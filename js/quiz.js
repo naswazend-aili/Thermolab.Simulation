@@ -207,6 +207,17 @@ function renderQuizTopic(idx){
     `;
   }).join('');
 
+  const answeredCount = Object.keys(userQuizData.answers).length;
+  if(answeredCount === t.questions.length) {
+    grid.innerHTML += `
+      <div class="quiz-card" style="background:var(--surface-2); text-align:center; border:2px solid var(--green); margin-top:20px;">
+        <h3 style="color:var(--green); margin-bottom:8px; font-size:18px;">🎉 Quiz Selesai!</h3>
+        <p>Kamu telah menyelesaikan seluruh pertanyaan untuk materi <b>${t.name}</b> dengan skor <b>${userQuizData.score}/${t.questions.length}</b>.</p>
+        <p style="font-size:13px; color:var(--muted); margin-top:8px;">Progress quiz kamu telah tercatat dan tersimpan secara otomatis.</p>
+      </div>
+    `;
+  }
+
   updateQuizScoreDisplay(t.id);
 }
 
@@ -226,6 +237,12 @@ function answerQuiz(topicIdx, qIdx, optionIdx){
   }
 
   saveAppState();
+  
+  const answeredCount = Object.keys(appState.quiz[t.id].answers).length;
+  if(answeredCount === t.questions.length) {
+    showToast(`Quiz ${t.name} selesai! Progress tercatat.`, 'success');
+  }
+
   renderQuizTopic(topicIdx);
 }
 

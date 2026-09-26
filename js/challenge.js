@@ -53,7 +53,9 @@ function startSoloChallenge(){
 
 function loadChallengeQuestion(){
   if(challengeCurrentIndex >= challengeQuestions.length){
-    challengeCurrentIndex = 0; // loop questions
+    clearInterval(challengeTimer);
+    endChallengeGame();
+    return;
   }
   const cur = challengeQuestions[challengeCurrentIndex];
   document.getElementById('gameQuestionTracker').textContent = `Soal ${challengeCurrentIndex + 1} dari ${challengeQuestions.length}`;

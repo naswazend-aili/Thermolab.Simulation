@@ -39,6 +39,11 @@ function initSlSim(){
     });
   }
 
+  const recordBtn = document.getElementById('slRecordBtn');
+  if(recordBtn){
+    recordBtn.addEventListener('click', recordSlData);
+  }
+
   // Piston Drag Event
   const slPistonEl = document.getElementById('slPiston');
   if(slPistonEl){
@@ -83,9 +88,18 @@ function drawSlCanvas(){
 
   // Gas particles inside
   slCtx.fillStyle = '#10b981';
+  const uVal = 50 + slQcum - slWcum;
+  const vib = Math.max(0, uVal * 0.1);
+  
   for(let i = 0; i < 25; i++){
-    const px = 50 + (i%5) * (slPistonX - 60)/5;
-    const py = 60 + Math.floor(i/5) * 38;
+    let px = 50 + (i%5) * (slPistonX - 60)/5;
+    let py = 60 + Math.floor(i/5) * 38;
+    
+    if(slRunning) {
+      px += (Math.random() - 0.5) * vib;
+      py += (Math.random() - 0.5) * vib;
+    }
+    
     slCtx.beginPath(); slCtx.arc(px, py, 6, 0, Math.PI * 2); slCtx.fill();
   }
 
@@ -93,15 +107,22 @@ function drawSlCanvas(){
 }
 
 function updateSlReadouts(){
-  const V = ((slPistonX - 40) * 0.05).toFixed(1);
-  const U = (50 + slQcum - slWcum).toFixed(1);
+  const numV = (slPistonX - 40) * 0.05;
+  const V = numV.toFixed(1);
+  const numU = 50 + slQcum - slWcum;
+  const U = numU.toFixed(1);
   const dU = (slQcum - slWcum).toFixed(1);
   const qMinusW = (slQcum - slWcum).toFixed(1);
+  
+  const T = Math.max(0, numU * 6).toFixed(0);
+  const P = Math.max(0, (numU * 6 / numV) * (13 / 300)).toFixed(1);
 
   const vEl = document.getElementById('slV'); if(vEl) vEl.textContent = V + ' L';
   const uEl = document.getElementById('slU'); if(uEl) uEl.textContent = U + ' J';
   const duEl = document.getElementById('slDeltaU'); if(duEl) duEl.textContent = dU;
   const qwEl = document.getElementById('slQMinusW'); if(qwEl) qwEl.textContent = qMinusW;
+  const tEl = document.getElementById('slT'); if(tEl) tEl.textContent = T + ' K';
+  const pEl = document.getElementById('slP'); if(pEl) pEl.textContent = P + ' atm';
 }
 
 function resetSislink(){
@@ -110,12 +131,15 @@ function resetSislink(){
   if(piston) piston.style.left = '300px';
   const startBtn = document.getElementById('slStartBtn');
   if(startBtn) startBtn.textContent = '▶ Mulai Praktikum';
+  const recBtn = document.getElementById('slRecordBtn');
+  if(recBtn) recBtn.textContent = '➕ Catat Kondisi Gas (0/3)';
   updateSlReadouts();
   appState.experimentsData.sl = [];
   saveAppState(); renderSlData();
 }
 
 function recordSlData(){
+  if(!slRunning){ showToast('Tekan Mulai Praktikum terlebih dahulu.', 'error'); if(typeof SFX !== 'undefined') SFX.warn(); return; }
   const dU = document.getElementById('slDeltaU').textContent;
   const qMinusW = document.getElementById('slQMinusW').textContent;
   const P = document.getElementById('slP').textContent;
@@ -124,6 +148,10 @@ function recordSlData(){
 
   const dataset = appState.experimentsData.sl;
   dataset.push({ action: `Kondisi #${dataset.length+1}`, P, V, T, dU, qMinusW });
+  
+  const recBtn = document.getElementById('slRecordBtn');
+  if(recBtn) recBtn.textContent = `➕ Catat Kondisi Gas (${dataset.length}/3)`;
+  
   saveAppState(); renderSlData();
   showToast(`Kondisi Hukum I #${dataset.length} Dicatat (ΔU = ${dU} J)`, 'success');
   if(typeof SFX !== 'undefined') SFX.success();
