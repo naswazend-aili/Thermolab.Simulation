@@ -8,7 +8,6 @@ const quizTopics = [
     name: 'Mesin Carnot',
     icon: '🔥',
     desc: 'Efisiensi mesin kalor ideal, reservoir panas & dingin, serta hubungan suhu dengan kerja mekanik.',
-    questions: [
       {
         q: 'Mesin Carnot bekerja di antara reservoir suhu tinggi T_H = 800 K dan suhu rendah T_C = 400 K. Berapakah efisiensi maksimumnya?',
         o: ['25%', '50%', '75%', '100%'],
@@ -32,6 +31,12 @@ const quizTopics = [
         o: ['Karena T_C tidak mungkin mencapai 0 Kelvin mutlak', 'Karena massa gas selalu bertambah', 'Karena kalor tidak memiliki energi', 'Karena volume piston konstan'],
         a: 0,
         e: 'Efisiensi 100% hanya tercapai jika T_C = 0 K, yang secara termodinamika tidak dapat dicapai.'
+      },
+      {
+        q: 'Sebuah mesin Carnot beroperasi dengan efisiensi 60%. Jika mesin membuang kalor sebesar 400 J ke reservoir dingin, berapakah usaha yang dihasilkan?',
+        o: ['200 J', '400 J', '600 J', '1000 J'],
+        a: 2,
+        e: 'η = W / Q_H = W / (W + Q_C). 0.6 = W / (W + 400) => W = 600 J.'
       }
     ]
   },
@@ -58,6 +63,18 @@ const quizTopics = [
         o: ['418 J', '4180 J', '41.8 J', '8360 J'],
         a: 1,
         e: 'Q = m · c · ΔT = 100 × 4.18 × 10 = 4180 J.'
+      },
+      {
+        q: 'Logam 100 g bersuhu 100°C dimasukkan ke dalam 200 g air (c=4.2 J/g°C) bersuhu 20°C. Jika suhu campuran 25°C, berapakah kalor jenis logam?',
+        o: ['0.42 J/g°C', '0.56 J/g°C', '0.68 J/g°C', '1.0 J/g°C'],
+        a: 1,
+        e: 'Q_lepas = Q_terima => 100 · c_L · 75 = 200 · 4.2 · 5 => 7500 c_L = 4200 => c_L = 0.56 J/g°C.'
+      },
+      {
+        q: 'Apakah yang dimaksud dengan kapasitas kalor (C)?',
+        o: ['Kalor untuk menaikkan suhu 1 gram zat sebesar 1°C', 'Kalor untuk menaikkan suhu seluruh benda sebesar 1°C', 'Kalor yang diserap benda saat berubah wujud', 'Kalor jenis dibagi massa benda'],
+        a: 1,
+        e: 'Kapasitas kalor (C = m · c) adalah jumlah kalor yang diperlukan benda secara keseluruhan untuk menaikkan suhunya 1°C.'
       }
     ]
   },
@@ -78,6 +95,24 @@ const quizTopics = [
         o: ['Tembaga', 'Besi', 'Kayu', 'Semua sama'],
         a: 0,
         e: 'Tembaga memiliki nilai konduktivitas termal tertinggi sehingga kalor merambat paling cepat.'
+      },
+      {
+        q: 'Laju perpindahan kalor secara konduksi berbanding terbalik dengan...',
+        o: ['Luas penampang benda', 'Perbedaan suhu ujung-ujung benda', 'Ketebalan atau panjang benda', 'Konduktivitas termal benda'],
+        a: 2,
+        e: 'Menurut rumus P = (k · A · ΔT) / L, laju konduksi berbanding terbalik dengan L (panjang atau ketebalan penghantar).'
+      },
+      {
+        q: 'Mengapa pegangan panci biasanya terbuat dari plastik atau kayu?',
+        o: ['Karena mereka adalah konduktor panas yang sangat baik', 'Karena mereka memiliki titik lebur sangat tinggi', 'Karena mereka adalah isolator dengan konduktivitas termal rendah', 'Karena kalor tidak bisa mengenai benda organik'],
+        a: 2,
+        e: 'Plastik dan kayu memiliki nilai k (konduktivitas termal) yang sangat kecil sehingga sulit menghantarkan panas, melindungi tangan.'
+      },
+      {
+        q: 'Jika ketebalan dinding ruangan diduakalikan (luas dan material sama), maka laju rambat kalor melalui dinding tersebut akan...',
+        o: ['Menjadi empat kali lebih besar', 'Menjadi dua kali lebih besar', 'Tetap sama', 'Menjadi setengah dari semula'],
+        a: 3,
+        e: 'Karena laju kalor P berbanding terbalik dengan ketebalan L, menduakalikan tebal (2L) akan mengurangi laju konduksi menjadi 1/2 kali semula.'
       }
     ]
   },
@@ -98,6 +133,24 @@ const quizTopics = [
         o: ['Q = m · L', 'Q = m · c · ΔT', 'η = 1 - (T_C/T_H)', 'ΔU = Q - W'],
         a: 0,
         e: 'Q = m · L digunakan saat perubahan fase zat berlangsung.'
+      },
+      {
+        q: 'Berapakah kalor yang dibutuhkan untuk meleburkan 2 kg es pada suhu 0°C (Kalor lebur es L = 334.000 J/kg)?',
+        o: ['167.000 J', '334.000 J', '668.000 J', '1.336.000 J'],
+        a: 2,
+        e: 'Gunakan rumus Q = m · L = 2 kg × 334.000 J/kg = 668.000 Joule.'
+      },
+      {
+        q: 'Pada tekanan 1 atm, air mendidih di suhu 100°C. Jika terus dipanaskan dengan api besar, suhu air akan...',
+        o: ['Terus naik melampaui 100°C', 'Tetap 100°C hingga seluruh air menjadi uap', 'Turun sedikit karena mendidih', 'Langsung berubah menjadi plasma'],
+        a: 1,
+        e: 'Saat air mendidih, energi kalor digunakan sebagai kalor laten penguapan sehingga suhunya tetap 100°C hingga molekul air habis berubah gas.'
+      },
+      {
+        q: 'Peristiwa zat menyerap kalor untuk berubah wujud dari padat langsung menjadi gas tanpa melalui fase cair disebut...',
+        o: ['Mencair', 'Membeku', 'Menyublim', 'Mengkristal'],
+        a: 2,
+        e: 'Menyublim adalah perubahan wujud fasa padat langsung menjadi gas, yang membutuhkan energi kalor.'
       }
     ]
   },
@@ -108,7 +161,7 @@ const quizTopics = [
     desc: 'Model partikel, energi kinetik rata-rata, dan kecepatan partikel terhadap suhu.',
     questions: [
       {
-        q: 'Menurut teori kinetik gas, kenaikan suhu suatu zat berbanding lurus dengan...',
+        q: 'Menurut teori kinetik gas, kenaikan suhu mutlak suatu zat berbanding lurus dengan...',
         o: ['Energi kinetik rata-rata partikel', 'Massa total partikel', 'Jumlah elektron bebas', 'Gravitasi wadah'],
         a: 0,
         e: 'Suhu mutlak berbanding lurus dengan energi kinetik translasi rata-rata partikel (<Ek> ∝ T).'
@@ -118,6 +171,24 @@ const quizTopics = [
         o: ['Bergerak bebas ke segala arah', 'Tersusun rapat dan hanya bergetar di sekitar posisinya', 'Saling berjauhan', 'Tidak memiliki gaya tarik'],
         a: 1,
         e: 'Partikel zat padat terikat kuat dalam kisi kristal/posisi teratur dan hanya bergetar.'
+      },
+      {
+        q: 'Dalam ruang tertutup, tekanan gas ideal timbul karena...',
+        o: ['Tumbukan partikel-partikel gas dengan dinding wadah', 'Gaya gravitasi bumi yang menarik partikel gas', 'Tumbukan antar sesama partikel gas', 'Kalor yang diserap oleh partikel'],
+        a: 0,
+        e: 'Menurut teori kinetik gas, tekanan timbul dari impuls akibat tumbukan lenting partikel gas yang bergerak acak terhadap luas dinding wadah.'
+      },
+      {
+        q: 'Jika suhu gas ideal (dalam wadah bervolume tetap) dinaikkan menjadi dua kali lipat dalam Kelvin, maka tekanannya akan...',
+        o: ['Menjadi setengahnya', 'Tetap sama', 'Menjadi dua kali lipat', 'Menjadi empat kali lipat'],
+        a: 2,
+        e: 'Sesuai Hukum Gay-Lussac (P/T = konstan untuk V tetap), tekanan sebanding dengan suhu mutlak. Jika suhu dinaikkan 2x, tekanan menjadi 2x.'
+      },
+      {
+        q: 'Kecepatan efektif (v_rms) molekul gas hidrogen (ringan) dibandingkan gas oksigen (berat) pada suhu yang sama adalah...',
+        o: ['Hidrogen lebih lambat', 'Sama persis karena suhunya sama', 'Hidrogen lebih cepat', 'Tergantung pada tekanan wadah'],
+        a: 2,
+        e: 'v_rms berbanding terbalik dengan akar massa molekul (v_rms ∝ 1/√M). Hidrogen jauh lebih ringan, sehingga partikelnya bergerak jauh lebih cepat.'
       }
     ]
   },
@@ -138,6 +209,24 @@ const quizTopics = [
         o: ['140 J', '60 J', '4000 J', '0 J'],
         a: 1,
         e: 'ΔU = Q - W = 100 J - 40 J = 60 J.'
+      },
+      {
+        q: 'Proses termodinamika di mana tidak ada pertukaran kalor yang masuk maupun keluar sistem (Q = 0) disebut proses...',
+        o: ['Isotermal', 'Isobarik', 'Isokhorik', 'Adiabatik'],
+        a: 3,
+        e: 'Proses adiabatik terjadi tanpa adanya pertukaran kalor antara sistem dan lingkungan, sehingga persamaannya menjadi ΔU = -W.'
+      },
+      {
+        q: 'Jika suatu gas ideal dimampatkan (volume diperkecil) dengan cepat secara adiabatik, maka suhu gas tersebut akan...',
+        o: ['Tetap', 'Turun', 'Naik', 'Menjadi 0 K'],
+        a: 2,
+        e: 'Pemampatan berarti sistem menerima kerja (W negatif). Karena adiabatik (Q=0), ΔU = 0 - (-W) = +W. Energi dalam naik, sehingga suhu naik.'
+      },
+      {
+        q: 'Pada sebuah proses isokhorik (volume gas dipertahankan tetap), usaha luar yang dilakukan oleh sistem selalu...',
+        o: ['Sebanding dengan kenaikan tekanan', 'Sama dengan kalor yang diserap', 'Bernilai nol', 'Sangat besar'],
+        a: 2,
+        e: 'Usaha termodinamika ditentukan oleh perubahan volume (W = P · ΔV). Karena volumenya dijaga tetap (ΔV = 0), maka usaha W selalu 0.'
       }
     ]
   }
