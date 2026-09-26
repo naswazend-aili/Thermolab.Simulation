@@ -8,6 +8,7 @@ const quizTopics = [
     name: 'Mesin Carnot',
     icon: '🔥',
     desc: 'Efisiensi mesin kalor ideal, reservoir panas & dingin, serta hubungan suhu dengan kerja mekanik.',
+    questions: [
       {
         q: 'Mesin Carnot bekerja di antara reservoir suhu tinggi T_H = 800 K dan suhu rendah T_C = 400 K. Berapakah efisiensi maksimumnya?',
         o: ['25%', '50%', '75%', '100%'],
