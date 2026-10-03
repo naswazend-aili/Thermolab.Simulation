@@ -293,6 +293,105 @@ main { max-width: 1180px; margin: 0 auto; padding: 36px 24px 90px; }
   font-size: 14.5px; font-weight: 500;
 }
 .hypothesis-option:hover { background: var(--surface-3); border-color: var(--primary); }
+
+/* ATURAN / CARA MAIN — shown at the top of every experiment page */
+.rules-card {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 18px 22px; margin-bottom: 18px;
+}
+.rules-card .rules-title {
+  font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.rules-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rules-list li {
+  counter-increment: rulestep; display: flex; gap: 12px; align-items: flex-start;
+  font-size: 13.5px; color: var(--text); line-height: 1.5;
+}
+.rules-list { counter-reset: rulestep; }
+.rules-list li::before {
+  content: counter(rulestep); flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--hot), var(--primary)); color: white; font-family: 'Poppins';
+  font-weight: 700; font-size: 11.5px; display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.rules-goal {
+  margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+
+/* ---- KALORIMETRI: CLICK-TO-PLACE INTERACTIVE BENCH ---- */
+.calo-bench { position: relative; width: 100%; min-height: 420px; padding-bottom: 130px; }
+.calo-station {
+  position: absolute; text-align: center; width: 150px; border-radius: 12px; padding: 6px;
+  transition: box-shadow .15s, background .15s;
+}
+#caloStationNeraca { left: 2%; top: 10px; }
+#caloStationPemanas { left: 50%; top: 10px; transform: translateX(-50%); }
+#caloStationKalo { right: 2%; top: 10px; }
+.calo-station.eligible {
+  background: var(--primary-glow, rgba(219,39,119,0.1)); box-shadow: 0 0 0 2px var(--primary); cursor: pointer;
+}
+.calo-label { font-size: 11.5px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+.calo-platform { width: 110px; height: 14px; background: linear-gradient(180deg,var(--surface-3),var(--border)); border-radius: 4px; margin: 56px auto 0; }
+.calo-readout {
+  margin: 10px auto 0; width: 110px; background: #0f172a; color: #4ade80; font-family: 'IBM Plex Mono';
+  font-size: 13px; text-align: center; padding: 4px 0; border-radius: 4px; min-height: 20px;
+}
+.calo-heater { width: 120px; height: 14px; background: linear-gradient(180deg,var(--surface-3),var(--border)); border-radius: 4px; margin: 56px auto 0; position: relative; }
+.calo-flame { position: absolute; left: 50%; top: -34px; transform: translateX(-50%); width: 26px; height: 34px; }
+.calo-flame::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #fff2c7, #ffb020 55%, #ff5a2e 90%);
+  animation: caloFlick .6s infinite alternate ease-in-out;
+}
+@keyframes caloFlick { from{ transform: scaleY(1) scaleX(1); } to{ transform: scaleY(1.15) scaleX(0.9); } }
+.calo-lamp { width: 40px; height: 20px; background: var(--surface-3); border-radius: 4px; margin: 8px auto 0; }
+.calo-cup {
+  width: 130px; height: 110px; margin: 36px auto 0; border-radius: 0 0 16px 16px; border: 3px solid var(--border-hover);
+  border-top: none; background: linear-gradient(180deg, rgba(79,195,247,0.35), var(--cold)); position: relative; overflow: hidden;
+}
+.calo-lid { width: 140px; height: 12px; background: var(--surface-3); border-radius: 4px; margin: -3px auto 0; }
+.calo-tray { position: absolute; bottom: 6px; left: 0; right: 0; display: flex; justify-content: center; gap: 56px; flex-wrap: wrap; }
+.calo-item-wrap { text-align: center; }
+.calo-slot-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+.calo-eq { position: relative; cursor: pointer; padding: 6px; border-radius: 10px; transition: box-shadow .15s, transform .15s; display: inline-block; }
+.calo-eq.held { box-shadow: 0 0 0 3px var(--hot); transform: translateY(-4px); }
+.calo-eq.disabled { opacity: 0.4; cursor: not-allowed; }
+.calo-logam-box {
+  width: 64px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;
+  background: linear-gradient(135deg,#64748b,#334155); color: white; font-weight: 700; font-size: 12.5px;
+}
+.calo-tang-overlay { position: absolute; top: -14px; right: -10px; font-size: 20px; display: none; }
+.calo-eq.held .calo-tang-overlay { display: block; }
+.calo-thermo-body {
+  width: 20px; height: 70px; border-radius: 10px; background: var(--surface-3); border: 2px solid var(--border-hover);
+  position: relative; overflow: hidden; margin: 0 auto;
+}
+.calo-thermo-fill { position: absolute; bottom: 0; left: 0; right: 0; height: 0%; background: var(--hot); transition: height .3s; }
+.calo-thermo-bulb { width: 30px; height: 30px; border-radius: 50%; background: var(--hot); margin: -6px auto 0; border: 2px solid var(--border-hover); }
+.calo-instruction {
+  background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; border-radius: 10px; padding: 12px 14px;
+  font-size: 13px; line-height: 1.5; margin: 14px 0; font-weight: 600;
+}
+[data-theme="dark"] .calo-instruction { background: #451a03; color: #fde68a; border-color: #92400e; }
+.calo-steps { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.calo-steps li {
+  font-size: 12.5px; color: var(--muted); padding: 6px 10px; border-radius: 8px; border: 1px solid transparent;
+}
+.calo-steps li.calo-step-active { background: var(--surface-3); color: var(--text); font-weight: 700; border-color: var(--primary); }
+.calo-steps li.calo-step-done { color: var(--green); text-decoration: line-through; }
+.calo-reveal { margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+.calo-reveal.correct { background: #dcfce7; color: #166534; }
+.calo-reveal.wrong { background: #fee2e2; color: #991b1b; }
+.calo-guess-select {
+  width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-size: 13.5px; margin-top: 6px;
+}
+@media(max-width: 720px){
+  .calo-bench { min-height: 520px; padding-bottom: 170px; }
+  #caloStationNeraca, #caloStationPemanas, #caloStationKalo { position: static; transform: none; display: inline-block; margin: 6px; }
+  .calo-tray { position: static; margin-top: 20px; }
+}
 .hypothesis-option.selected { border-color: var(--primary); background: var(--primary-glow); font-weight: 700; color: var(--primary); }
 .hypothesis-option input[type="radio"] { accent-color: var(--primary); width: 18px; height: 18px; }
 
@@ -447,3 +546,103 @@ footer.site-footer {
   border-top: 1px solid var(--border); margin-top: 48px;
 }
 footer.site-footer .fdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 4px; }
+
+/* ---- CHALLENGE: MONSTER BATTLE ---- */
+.monster-arena { display: flex; align-items: center; gap: 18px; background: rgba(0,0,0,0.25); border-radius: 14px; padding: 14px 18px; }
+.monster-emoji { font-size: 64px; line-height: 1; transition: transform .2s; }
+.monster-emoji.hit { animation: monsterHit .5s; }
+.monster-emoji.dodge { animation: monsterDodge .5s; }
+.monster-emoji.dead { transform: rotate(90deg) scale(.7); opacity: .4; filter: grayscale(1); }
+@keyframes monsterHit { 0%{transform:translateX(0);filter:brightness(1)} 20%{transform:translateX(-14px);filter:brightness(2.2) sepia(1) hue-rotate(-30deg)} 40%{transform:translateX(14px)} 60%{transform:translateX(-8px)} 100%{transform:translateX(0);filter:brightness(1)} }
+@keyframes monsterDodge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+.monster-info { flex: 1; }
+.monster-hp-bar { height: 16px; background: rgba(255,255,255,0.15); border-radius: 8px; overflow: hidden; margin: 6px 0 4px; }
+.monster-hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ef4444, #f97316); transition: width .5s ease; }
+.team-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.team-chip { padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; background: rgba(255,255,255,0.1); border: 2px solid transparent; }
+.team-chip.active { border-color: #fde68a; background: rgba(253,230,138,0.18); }
+.challenge-opt-btn.correct { background: #16a34a !important; border-color: #86efac !important; }
+.challenge-opt-btn.wrong { background: #dc2626 !important; border-color: #fca5a5 !important; }
+.challenge-opt-btn:disabled { cursor: default; transform: none; }
+
+.exp-subtitle { color: var(--muted); font-size: 13.5px; margin: 0 0 14px; }
+
+/* ---- CETAK / SIMPAN PDF: hanya lembar laporan yang tercetak ---- */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body * { visibility: hidden !important; }
+  #reportPrintArea, #reportPrintArea * { visibility: visible !important; }
+  #reportPrintArea {
+    position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; padding: 0 !important;
+    box-shadow: none !important; border: none !important; background: #fff !important; color: #0f172a !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  #reportPrintArea table { page-break-inside: auto; }
+  #reportPrintArea tr { page-break-inside: avoid; }
+  #reportPrintArea h4 { page-break-after: avoid; }
+}
+
+/* ======================================================================
+   KAHOOT-STYLE VISUALS: tombol jawaban bentuk+warna, timer cincin,
+   confetti, dan podium juara. Dipakai di Challenge (pass-and-play)
+   dan di host-battle.html / player-battle.html (real-time).
+   ====================================================================== */
+.kq-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+@media(max-width:560px){ .kq-grid{ grid-template-columns:1fr; } }
+
+.kq-opt {
+  position:relative; display:flex; align-items:center; gap:14px; padding:18px 20px;
+  border:none; border-radius:14px; cursor:pointer; text-align:left;
+  font-family:'Poppins'; font-weight:700; font-size:16px; color:#fff;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 18px rgba(0,0,0,0.25);
+  transform: translateY(0); transition: transform .08s, box-shadow .08s, filter .15s;
+}
+.kq-opt:active:not(:disabled){ transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.25); }
+.kq-opt:hover:not(:disabled){ filter: brightness(1.08); }
+.kq-opt:disabled{ cursor:default; }
+.kq-opt .kq-shape{ width:30px; height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.kq-opt-0 { background:#e21b3c; } /* merah · segitiga */
+.kq-opt-1 { background:#1368ce; } /* biru · wajik */
+.kq-opt-2 { background:#d89e00; } /* kuning · lingkaran */
+.kq-opt-3 { background:#26890c; } /* hijau · kotak */
+.kq-opt.kq-correct { background:#16a34a !important; box-shadow: 0 6px 0 #0f7a33, 0 0 0 4px #86efac, 0 10px 24px rgba(22,163,74,.5); }
+.kq-opt.kq-wrong { background:#7f1d1d !important; opacity:.55; filter:grayscale(.3); }
+.kq-opt.kq-dim { opacity:.4; filter:grayscale(.5); }
+
+/* timer cincin besar */
+.kq-timer-wrap { display:flex; align-items:center; justify-content:center; margin:6px 0 2px; }
+.kq-timer-ring { width:76px; height:76px; position:relative; }
+.kq-timer-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.kq-timer-ring circle { fill:none; stroke-width:7; }
+.kq-timer-ring .kq-ring-bg { stroke:rgba(255,255,255,0.15); }
+.kq-timer-ring .kq-ring-fg { stroke:#fde68a; stroke-linecap:round; transition: stroke-dashoffset .25s linear, stroke .25s; }
+.kq-timer-ring .kq-ring-fg.urgent { stroke:#ef4444; }
+.kq-timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-weight:800; font-size:22px; color:#fff; }
+
+/* confetti */
+.kq-confetti-piece {
+  position:fixed; top:-20px; width:10px; height:16px; z-index:9999; pointer-events:none;
+  animation: kqFall linear forwards;
+}
+@keyframes kqFall {
+  0% { transform: translateY(0) rotate(0deg); opacity:1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity:.9; }
+}
+
+/* podium juara */
+.kq-podium { display:flex; align-items:flex-end; justify-content:center; gap:10px; margin:28px 0 10px; }
+.kq-podium-col { display:flex; flex-direction:column; align-items:center; width:110px; }
+.kq-podium-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; color:#fff; margin-bottom:8px; border:3px solid rgba(255,255,255,0.5); }
+.kq-podium-name { font-size:12.5px; font-weight:700; color:#fff; text-align:center; margin-bottom:2px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.kq-podium-score { font-size:11px; color:#fde68a; margin-bottom:8px; font-weight:700; }
+.kq-podium-bar { width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:10px; font-family:'Poppins'; font-weight:900; font-size:22px; color:#fff; }
+.kq-podium-col.gold .kq-podium-bar { height:120px; background:linear-gradient(180deg,#fde047,#d89e00); }
+.kq-podium-col.silver .kq-podium-bar { height:90px; background:linear-gradient(180deg,#e2e8f0,#94a3b8); }
+.kq-podium-col.bronze .kq-podium-bar { height:66px; background:linear-gradient(180deg,#fb923c,#c2410c); }
+.kq-podium-col.gold { order:2; } .kq-podium-col.silver { order:1; } .kq-podium-col.bronze { order:3; }
+.kq-podium-col.gold .kq-podium-avatar { width:64px; height:64px; font-size:22px; border-color:#fde047; }
+
+.kq-flash { animation: kqFlash .35s; }
+@keyframes kqFlash { 0%{ filter:brightness(2.4); } 100%{ filter:brightness(1); } }
+.kq-shake { animation: kqShake .4s; }
+@keyframes kqShake { 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)} 30%,50%,70%{transform:translateX(-8px)} 40%,60%{transform:translateX(8px)} }

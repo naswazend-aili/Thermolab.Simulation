@@ -1,0 +1,20 @@
+/* ---- HOST & PLAYER: Battle Real-time (Firebase) ---- */
+.battle-wrap { max-width: 720px; margin: 0 auto; padding: 24px 18px 60px; }
+.battle-pin-box { text-align:center; background: linear-gradient(135deg,#1e293b,#0f172a); border-radius:20px; padding:28px; color:#fff; }
+.battle-pin-box .pin-label { font-size:13px; color:#93c5fd; text-transform:uppercase; letter-spacing:.08em; font-weight:700; }
+.battle-pin-box .pin-code { font-family:'IBM Plex Mono'; font-size:56px; font-weight:800; letter-spacing:.12em; color:#fde68a; margin:8px 0; }
+.battle-pin-box .pin-url { font-size:13px; color:#cbd5e1; word-break:break-all; }
+.battle-players { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; justify-content:center; }
+.battle-player-chip { background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.2); padding:8px 16px; border-radius:999px; font-weight:700; font-size:13.5px; color:#fff; }
+.battle-join-form { background:var(--surface-2); border:1px solid var(--border); border-radius:16px; padding:24px; margin-top:20px; }
+.battle-join-form input { width:100%; padding:14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:16px; margin-bottom:12px; box-sizing:border-box; }
+.battle-join-form input#joinPin { text-transform:uppercase; letter-spacing:.15em; font-family:'IBM Plex Mono'; font-weight:700; text-align:center; font-size:22px; }
+.battle-status-banner { text-align:center; padding:40px 20px; color:var(--muted); font-size:15px; }
+.battle-timer { font-family:'IBM Plex Mono'; font-size:15px; font-weight:800; color:#fde68a; }
+.battle-answered-note { text-align:center; font-size:13px; color:var(--muted); margin-top:10px; }
+.battle-locked-opt { opacity:.55; }
+.battle-reveal-badge { text-align:center; font-size:20px; font-weight:800; padding:16px; border-radius:12px; margin-bottom:14px; }
+.battle-reveal-badge.ok { background:#dcfce7; color:#166534; }
+.battle-reveal-badge.no { background:#fee2e2; color:#991b1b; }
+.battle-rank-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:10px; background:var(--surface-2); margin-bottom:6px; }
+.battle-host-controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; justify-content:center; }
