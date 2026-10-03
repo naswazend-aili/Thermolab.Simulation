@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThermoLab — Join Battle Monster</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700;800&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/battle.css">
+<script src="js/kahoot-fx.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="battle-wrap">
+
+  <!-- FORM JOIN -->
+  <div id="viewJoin">
+    <div style="text-align:center; margin-bottom:10px;">
+      <div style="font-size:48px;">👾</div>
+      <h1 style="font-size:20px; margin:4px 0;">Battle Monster ThermoLab</h1>
+      <p style="color:var(--muted); font-size:13px;">Masukkan PIN dari layar proyektor gurumu</p>
+    </div>
+    <div class="battle-join-form">
+      <input type="text" id="joinPin" placeholder="PIN ROOM" maxlength="6">
+      <input type="text" id="joinName" placeholder="Nama kamu" maxlength="18">
+      <button class="action-btn" id="joinBtn" style="width:100%;">🚀 Gabung</button>
+      <p id="joinError" style="color:#ef4444; font-size:13px; margin-top:8px; display:none;"></p>
+    </div>
+  </div>
+
+  <!-- MENUNGGU -->
+  <div id="viewWaiting" style="display:none;" class="battle-status-banner">
+    <div style="font-size:40px;">⏳</div>
+    <p>Tersambung sebagai <b id="waitingName"></b>.<br>Menunggu guru memulai battle...</p>
+  </div>
+
+  <!-- SOAL AKTIF -->
+  <div id="viewQuestion" style="display:none;">
+    <div class="monster-hp-bar" style="margin-bottom:4px;"><div class="monster-hp-fill" id="pMonsterHpFill"></div></div>
+    <div style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:4px;" id="pQTracker">Soal 1</div>
+    <div class="kq-timer-wrap" id="pTimerWrap"></div>
+    <h2 style="font-size:18px; text-align:center;" id="pQText">Memuat soal...</h2>
+    <div id="pOptions" class="kq-grid" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- SUDAH JAWAB -->
+  <div id="viewLocked" style="display:none;" class="battle-status-banner">
+    <div style="font-size:40px;">✅</div>
+    <p>Jawaban terkirim! Menunggu pemain lain...</p>
+  </div>
+
+  <!-- HASIL RONDE -->
+  <div id="viewRoundResult" style="display:none; text-align:center;">
+    <div class="battle-reveal-badge" id="roundBadge"></div>
+    <div class="monster-hp-bar"><div class="monster-hp-fill" id="rMonsterHpFill"></div></div>
+    <p style="font-size:13px; color:var(--muted); margin-top:6px;">Total damage kamu sejauh ini: <b id="myTotalDmg">0</b></p>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="viewFinal" style="display:none; text-align:center;">
+    <div style="font-size:56px;" id="fEmoji">🏆</div>
+    <h2 style="font-size:22px;" id="fTitle"></h2>
+    <p style="font-size:14px; color:var(--muted);" id="fSub"></p>
+    <div id="fPodium"></div>
+    <div id="fRanking" style="margin-top:14px; text-align:left;"></div>
+  </div>
+
+</div>
+
+<script src="js/firebase-config.js"></script>
+<script>
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function show(id){
+  ['viewJoin','viewWaiting','viewQuestion','viewLocked','viewRoundResult','viewFinal'].forEach(v => $(v).style.display = (v===id?'block':'none'));
+}
+const COLORS = ['#ef4444','#3b82f6','#22c55e','#f59e0b','#a855f7','#ec4899','#14b8a6','#f97316'];
+
+let pin = null, playerId = null, playerName = '', myColor = '';
+let battleRef, playersCol, answersCol;
+const ROUND_SECONDS = 20;
+let lastSeenQIndex = -1, lastStatus = null, currentDeadline = 0, timerInt = null;
+
+const urlPin = new URLSearchParams(location.search).get('pin');
+if(urlPin) $('joinPin').value = urlPin.toUpperCase();
+
+$('joinBtn').onclick = async () => {
+  pin = $('joinPin').value.trim().toUpperCase();
+  playerName = $('joinName').value.trim();
+  if(pin.length !== 6){ return joinErr('PIN harus 6 karakter.'); }
+  if(!playerName){ return joinErr('Isi nama kamu dulu.'); }
+
+  battleRef = db.collection('battles').doc(pin);
+  const snap = await battleRef.get();
+  if(!snap.exists){ return joinErr('PIN tidak ditemukan. Cek lagi ke gurumu.'); }
+  if(snap.data().status !== 'lobby'){ return joinErr('Battle sudah dimulai / selesai. Minta guru buat room baru.'); }
+
+  playersCol = battleRef.collection('players');
+  answersCol = battleRef.collection('answers');
+  playerId = localStorage.getItem('thermolab_pid_' + pin) || ('p' + Math.random().toString(36).slice(2, 10));
+  localStorage.setItem('thermolab_pid_' + pin, playerId);
+  myColor = COLORS[Math.floor(Math.random()*COLORS.length)];
+
+  await playersCol.doc(playerId).set({
+    name: playerName, color: myColor, damage: 0, correct: 0,
+    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  $('waitingName').textContent = playerName;
+  show('viewWaiting');
+  listenBattle();
+};
+
+function joinErr(msg){ $('joinError').textContent = msg; $('joinError').style.display = 'block'; }
+
+function listenBattle(){
+  battleRef.onSnapshot(doc => {
+    const d = doc.data();
+    if(!d) return;
+    updateHpBars(d.monsterHp, d.maxHp);
+
+    if(d.status === 'question' && d.qOptions){
+      currentDeadline = d.qDeadline;
+      if(d.qIndex !== lastSeenQIndex || lastStatus !== 'question'){
+        lastSeenQIndex = d.qIndex;
+        renderQuestion(d);
+      }
+    } else if(d.status === 'reveal' && lastStatus !== 'reveal'){
+      renderRoundResult(d);
+    } else if(d.status === 'ended' && lastStatus !== 'ended'){
+      renderFinal(d);
+    }
+    lastStatus = d.status;
+  });
+}
+
+function updateHpBars(hp, max){
+  const pct = max ? Math.max(0, hp/max*100) : 100;
+  ['pMonsterHpFill','rMonsterHpFill'].forEach(id => { const el = $(id); if(el) el.style.width = pct + '%'; });
+}
+
+async function renderQuestion(d){
+  clearInterval(timerInt);
+  const already = await answersCol.doc(pin + '_' + d.qIndex + '_' + playerId).get();
+  $('pQTracker').textContent = `Soal ${d.qIndex+1} dari ${d.totalQuestions||'?'}`;
+  $('pQText').textContent = d.qText;
+  $('pOptions').innerHTML = d.qOptions.map((opt,i) => `<button class="kq-opt kq-opt-${i}" onclick="answer(${i})" data-opt="${i}">${KQ_SHAPES[i]}<span>${esc(opt)}</span></button>`).join('');
+  $('pTimerWrap').innerHTML = kqTimerRingHTML('pRing');
+  const ringUpdate = kqTimerRing('pRing');
+
+  if(already.exists){ show('viewLocked'); return; }
+  show('viewQuestion');
+  timerInt = setInterval(() => {
+    const left = Math.max(0, (currentDeadline - Date.now())/1000);
+    ringUpdate(left, ROUND_SECONDS);
+    if(left <= 0) clearInterval(timerInt);
+  }, 200);
+}
+
+window.answer = async function(idx){
+  clearInterval(timerInt);
+  document.querySelectorAll('#pOptions .kq-opt').forEach(b => b.disabled = true);
+  const battleSnap = await battleRef.get();
+  const d = battleSnap.data();
+  const isCorrect = idx === d.qCorrectIndex;
+  const docId = pin + '_' + d.qIndex + '_' + playerId;
+  try {
+    await answersCol.doc(docId).set({
+      qIndex: d.qIndex, playerId, isCorrect, choiceIndex: idx, answeredAt: Date.now()
+    });
+  } catch(e){}
+  show('viewLocked');
+};
+
+function renderRoundResult(d){
+  const mine = (d.roundResults || []).find(r => r.name === playerName);
+  const badge = $('roundBadge');
+  if(mine){
+    badge.className = 'battle-reveal-badge ' + (mine.correct ? 'ok' : 'no');
+    badge.textContent = mine.correct ? `🎯 Benar! +${mine.dmg} damage ke monster` : '❌ Jawaban kurang tepat';
+  } else {
+    badge.className = 'battle-reveal-badge no';
+    badge.textContent = '⏰ Kamu tidak sempat menjawab ronde ini';
+  }
+  playersCol.doc(playerId).get().then(s => { $('myTotalDmg').textContent = (s.data()||{}).damage || 0; });
+  show('viewRoundResult');
+}
+
+function renderFinal(d){
+  const ranked = d.finalRanking || [];
+  $('fEmoji').textContent = d.winner ? '🏆' : '💀';
+  $('fTitle').textContent = d.winner ? 'MONSTER DIKALAHKAN!' : 'MONSTER MASIH BERTAHAN';
+  const mineIdx = ranked.findIndex(r => r.name === playerName);
+  $('fSub').textContent = mineIdx === 0 ? 'Kamu jadi MVP battle ini! 🎉' : (mineIdx >= 0 ? `Posisi kamu: #${mineIdx+1}` : '');
+  $('fPodium').innerHTML = ranked.length > 1 ? kqPodiumHTML(ranked) : '';
+  $('fRanking').innerHTML = ranked.map((r,i) => `
+    <div class="battle-rank-row"><span>${['🥇','🥈','🥉'][i]||(i+1)}</span>
+    <span style="color:${r.color}; font-weight:700;">${esc(r.name)}</span>
+    <span>${r.correct||0} benar</span><span><b>${r.damage||0}</b> dmg</span></div>`).join('');
+  show('viewFinal');
+  if(d.winner) kqConfettiBurst(120);
+}
+</script>
+</body>
+</html>

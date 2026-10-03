@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThermoLab — Host Battle Monster</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700;800&family=Poppins:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/battle.css">
+<script src="js/kahoot-fx.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body data-theme="dark">
+<div class="battle-wrap">
+
+  <div style="text-align:center; margin-bottom:18px;">
+    <h1 style="font-size:22px; margin:0;">👾 ThermoLab — Host Battle Monster</h1>
+    <p style="color:var(--muted); font-size:13px; margin-top:4px;">Layar ini untuk ditampilkan di proyektor/laptop. Siswa join lewat HP masing-masing.</p>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="viewLobby">
+    <div class="battle-pin-box">
+      <div class="pin-label">PIN Room</div>
+      <div class="pin-code" id="pinDisplay">------</div>
+      <div class="pin-url">Buka <b id="joinUrlText">player-battle.html</b> di HP, lalu masukkan PIN ini</div>
+    </div>
+    <div class="battle-players" id="lobbyPlayers"></div>
+    <p class="battle-answered-note" id="lobbyCount">Menunggu siswa join...</p>
+    <div class="battle-host-controls">
+      <button class="action-btn" id="startBtn" disabled>⚔️ Mulai Battle</button>
+    </div>
+  </div>
+
+  <!-- BATTLE AKTIF -->
+  <div id="viewBattle" style="display:none;">
+    <div class="monster-arena">
+      <div class="monster-emoji" id="monsterEmoji">👾</div>
+      <div class="monster-info">
+        <div style="font-weight:800; font-size:15px;">Entropi si Monster Panas</div>
+        <div class="monster-hp-bar"><div class="monster-hp-fill" id="monsterHpFill"></div></div>
+        <div id="monsterHpText" style="font-family:'IBM Plex Mono'; font-size:12px; color:#fca5a5;">HP</div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">
+      <span id="qTracker" style="font-size:13.5px; color:var(--muted);">Soal 1</span>
+    </div>
+    <div class="kq-timer-wrap" id="hostTimerWrap"></div>
+    <h2 style="font-size:22px; margin:10px 0; text-align:center;" id="qText">Memuat soal...</h2>
+    <div id="qOptionsHost" class="kq-grid"></div>
+    <p class="battle-answered-note" id="answeredNote">0 dari 0 siswa sudah menjawab</p>
+    <div class="battle-host-controls">
+      <button class="action-btn" id="closeRoundBtn">✅ Tutup Soal & Lihat Hasil</button>
+    </div>
+  </div>
+
+  <!-- HASIL RONDE -->
+  <div id="viewReveal" style="display:none;">
+    <h2 style="text-align:center; font-size:20px;">📊 Hasil Ronde Ini</h2>
+    <div id="revealList"></div>
+    <div class="battle-host-controls">
+      <button class="action-btn" id="nextRoundBtn">➡️ Soal Berikutnya</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="viewEnded" style="display:none; text-align:center;">
+    <div style="font-size:64px;" id="endEmoji">🏆</div>
+    <h2 style="font-size:26px;" id="endTitle">SELESAI</h2>
+    <div id="hostPodium"></div>
+    <div id="finalRanking" style="margin-top:16px;"></div>
+    <div class="battle-host-controls">
+      <button class="action-btn ghost" onclick="location.reload()">🔄 Buat Room Baru</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/firebase-config.js"></script>
+<script>
+const COLORS = ['#ef4444','#3b82f6','#22c55e','#f59e0b','#a855f7','#ec4899','#14b8a6','#f97316'];
+const QUESTION_BANK = [
+  { q: 'Sebuah mesin Carnot memiliki T_H = 600 K dan T_C = 300 K. Efisiensinya adalah...', o: ['50%','25%','75%','100%'], a: 0 },
+  { q: 'Asas Black menyatakan bahwa pada kalorimeter tertutup berlaku hubungan...', o: ['Q_lepas = Q_terima','Q = m · L','ΔU = Q + W','W = P · V'], a: 0 },
+  { q: 'Di antara tembaga, besi, dan kayu, material konduktor terbaik adalah...', o: ['Tembaga','Besi','Kayu','Air'], a: 0 },
+  { q: 'Pada grafik kurva pemanasan, bagian mendatar menunjukkan proses...', o: ['Perubahan wujud zat','Kenaikan suhu cepat','Penurunan tekanan','Penyerapan massa'], a: 0 },
+  { q: 'Kenaikan suhu pada suatu zat berbanding lurus dengan...', o: ['Energi kinetik rata-rata partikel','Massa wadah','Jumlah proton','Tinggi tempat'], a: 0 },
+  { q: 'Jika gas menyerap kalor 200 J dan melakukan usaha 50 J, maka ΔU adalah...', o: ['150 J','250 J','100 J','50 J'], a: 0 },
+  { q: 'Kalor yang digunakan untuk mengubah zat cair menjadi gas disebut...', o: ['Kalor laten penguapan','Kalor jenis','Kapasitas kalor','Kalor peleburan'], a: 0 },
+  { q: 'Kalor jenis air 4,18 J/g·°C artinya...', o: ['4,18 J menaikkan suhu 1 g air sebesar 1°C','4,18 J melebur 1 g es','4,18 J menguapkan 1 g air','4,18 J menaikkan suhu 1 kg air 1 K'], a: 0 },
+  { q: 'Perpindahan kalor melalui zat padat tanpa disertai perpindahan partikelnya disebut...', o: ['Konduksi','Konveksi','Radiasi','Evaporasi'], a: 0 },
+  { q: 'Pada proses isotermal gas ideal, perubahan energi dalamnya...', o: ['Sama dengan nol','Selalu positif','Selalu negatif','Sama dengan 2W'], a: 0 }
+];
+const ROUND_SECONDS = 20;
+
+function genPin(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // tanpa 0/O/1/I biar ga ketukar
+  let s = '';
+  for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function shuffle(a){ return [...a].sort(()=>0.5-Math.random()); }
+function $(id){ return document.getElementById(id); }
+function show(id){
+  ['viewLobby','viewBattle','viewReveal','viewEnded'].forEach(v => $(v).style.display = (v===id?'block':'none'));
+}
+
+let pin = genPin();
+let battleRef, playersCol, answersCol;
+let questions = [], qIndex = -1, maxHp = 0, roundTimer = null, roundDeadline = 0, hostRingUpdate = null;
+let playersCache = {};
+
+function init(){
+  $('pinDisplay').textContent = pin;
+  const url = location.href.replace('host-battle.html', 'player-battle.html') + '?pin=' + pin;
+  $('joinUrlText').textContent = 'player-battle.html';
+  battleRef = db.collection('battles').doc(pin);
+  playersCol = battleRef.collection('players');
+  answersCol = battleRef.collection('answers');
+
+  battleRef.set({
+    status: 'lobby', createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    qIndex: -1, monsterHp: 0, maxHp: 0
+  });
+
+  playersCol.onSnapshot(snap => {
+    playersCache = {};
+    const chips = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      playersCache[doc.id] = { ...d, id: doc.id };
+      chips.push(`<span class="battle-player-chip" style="border-color:${d.color}">${esc(d.name)}</span>`);
+    });
+    $('lobbyPlayers').innerHTML = chips.join('');
+    const n = Object.keys(playersCache).length;
+    $('lobbyCount').textContent = n === 0 ? 'Menunggu siswa join...' : `${n} siswa sudah join`;
+    $('startBtn').disabled = n === 0;
+    renderAnsweredCount();
+  });
+
+  $('startBtn').onclick = startBattle;
+  $('closeRoundBtn').onclick = closeRound;
+  $('nextRoundBtn').onclick = nextRound;
+
+  battleRef.onSnapshot(doc => {
+    const d = doc.data();
+    if(!d || !d.maxHp) return;
+    const pct = Math.max(0, d.monsterHp / d.maxHp * 100);
+    $('monsterHpFill').style.width = pct + '%';
+    $('monsterHpText').textContent = `HP ${Math.max(0, Math.round(d.monsterHp))} / ${d.maxHp}`;
+    if(d.monsterHp <= 0) $('monsterEmoji').classList.add('dead');
+  });
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function startBattle(){
+  const n = Object.keys(playersCache).length;
+  questions = shuffle(QUESTION_BANK).slice(0, Math.min(10, QUESTION_BANK.length));
+  maxHp = questions.length * 60 * Math.max(1, Math.ceil(n/2));
+  qIndex = -1;
+  battleRef.update({ status: 'starting', maxHp, monsterHp: maxHp, totalQuestions: questions.length });
+  show('viewBattle');
+  nextQuestion();
+}
+
+function nextQuestion(){
+  qIndex++;
+  if(qIndex >= questions.length){ return endBattle(); }
+  const cur = questions[qIndex];
+  const shuffled = cur.o.map((opt,i)=>({opt,isCorrect:i===cur.a})).sort(()=>0.5-Math.random());
+  roundDeadline = Date.now() + ROUND_SECONDS*1000;
+  battleRef.update({
+    status: 'question', qIndex, qText: cur.q,
+    qOptions: shuffled.map(s=>s.opt), qCorrectIndex: shuffled.findIndex(s=>s.isCorrect),
+    qDeadline: roundDeadline
+  });
+  $('qTracker').textContent = `Soal ${qIndex+1} dari ${questions.length}`;
+  $('qText').textContent = cur.q;
+  $('qOptionsHost').innerHTML = shuffled.map((s,i) => `<div class="kq-opt kq-opt-${i}" style="cursor:default;">${KQ_SHAPES[i]}<span>${esc(s.opt)}</span></div>`).join('');
+  $('hostTimerWrap').innerHTML = kqTimerRingHTML('hostRing');
+  hostRingUpdate = kqTimerRing('hostRing');
+  renderAnsweredCount();
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(roundTimer);
+  roundTimer = setInterval(() => {
+    const left = Math.max(0, (roundDeadline - Date.now())/1000);
+    if(hostRingUpdate) hostRingUpdate(left, ROUND_SECONDS);
+    if(left <= 0){ clearInterval(roundTimer); closeRound(); }
+  }, 250);
+}
+
+function renderAnsweredCount(){
+  if(qIndex < 0) return;
+  answersCol.where('qIndex','==',qIndex).get().then(snap => {
+    $('answeredNote').textContent = `${snap.size} dari ${Object.keys(playersCache).length} siswa sudah menjawab`;
+  }).catch(()=>{});
+}
+
+async function closeRound(){
+  clearInterval(roundTimer);
+  const snap = await answersCol.where('qIndex','==',qIndex).get();
+  let totalDamage = 0;
+  const results = [];
+  const batch = db.batch();
+  snap.forEach(doc => {
+    const a = doc.data();
+    const p = playersCache[a.playerId];
+    if(!p) return;
+    let dmg = 0;
+    if(a.isCorrect){
+      const secLeft = Math.max(0, (roundDeadline - a.answeredAt)/1000);
+      dmg = Math.round(60 + secLeft*4);
+      totalDamage += dmg;
+    }
+    results.push({ name: p.name, color: p.color, correct: a.isCorrect, dmg });
+    batch.update(playersCol.doc(a.playerId), {
+      damage: firebase.firestore.FieldValue.increment(dmg),
+      correct: firebase.firestore.FieldValue.increment(a.isCorrect ? 1 : 0)
+    });
+  });
+  await batch.commit();
+
+  const newHp = Math.max(0, (await battleRef.get()).data().monsterHp - totalDamage);
+  await battleRef.update({ status: 'reveal', monsterHp: newHp, roundResults: results });
+
+  $('revealList').innerHTML = results.length
+    ? results.map(r => `<div class="battle-rank-row"><span style="color:${r.color}; font-weight:700;">${esc(r.name)}</span><span>${r.correct ? '✅ +'+r.dmg+' dmg' : '❌ meleset'}</span></div>`).join('')
+    : '<p class="battle-answered-note">Tidak ada yang menjawab ronde ini.</p>';
+  show('viewReveal');
+
+  if(newHp <= 0) setTimeout(endBattle, 1200);
+}
+
+async function nextRound(){
+  const d = (await battleRef.get()).data();
+  if(d.monsterHp <= 0){ return endBattle(); }
+  show('viewBattle');
+  nextQuestion();
+}
+
+async function endBattle(){
+  clearInterval(roundTimer);
+  const snap = await playersCol.orderBy('damage','desc').get();
+  const ranked = []; snap.forEach(d => ranked.push(d.data()));
+  const won = (await battleRef.get()).data().monsterHp <= 0;
+  await battleRef.update({ status: 'ended', winner: won, finalRanking: ranked });
+
+  $('endEmoji').textContent = won ? '🏆' : '💀';
+  $('endTitle').textContent = won ? 'MONSTER DIKALAHKAN!' : 'WAKTU HABIS, MONSTER MASIH HIDUP';
+  $('hostPodium').innerHTML = ranked.length > 1 ? kqPodiumHTML(ranked) : '';
+  $('finalRanking').innerHTML = ranked.map((r,i) => `
+    <div class="battle-rank-row"><span>${['🥇','🥈','🥉'][i]||(i+1)}</span>
+    <span style="color:${r.color}; font-weight:700;">${esc(r.name)}</span>
+    <span>${r.correct||0} benar</span><span><b>${r.damage||0}</b> dmg</span></div>`).join('');
+  show('viewEnded');
+  if(won) kqConfettiBurst(150);
+}
+
+init();
+</script>
+</body>
+</html>
