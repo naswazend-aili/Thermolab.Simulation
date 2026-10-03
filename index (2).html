@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThermoLab — Laboratorium Virtual Termodinamika EdTech</title>
+
+  <!-- SEO & link preview (WhatsApp, media sosial, dsb.) -->
+  <meta name="description" content="Laboratorium virtual termodinamika: 6 simulasi interaktif (Asas Black, Hukum I & II, konduksi, kalor laten, teori kinetik) lengkap dengan hipotesis, grafik data, kuis, dan battle monster kuis.">
+  <meta name="author" content="naswazend-aili">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ThermoLab — Laboratorium Virtual Termodinamika">
+  <meta property="og:description" content="6 simulasi interaktif termodinamika dengan hipotesis, grafik data, kuis, dan battle monster. Coba langsung di browser, gratis.">
+  <meta property="og:image" content="https://naswazend-aili.github.io/Thermolab.Simulation/thumbnail.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ThermoLab — Laboratorium Virtual Termodinamika">
+  <meta name="twitter:description" content="6 simulasi interaktif termodinamika dengan hipotesis, grafik data, kuis, dan battle monster.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌡️</text></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- External CDN Libraries (Chart.js & SheetJS) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- SITE NAVIGATION HEADER -->
+  <nav class="site-nav">
+    <div class="brand" onclick="goTo('beranda')">
+      <svg class="thermo-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="thermoGrad" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#0ea5e9"/>
+            <stop offset="50%" stop-color="#10b981"/>
+            <stop offset="100%" stop-color="#f97316"/>
+          </linearGradient>
+        </defs>
+        <rect x="17" y="4" width="6" height="20" rx="3" fill="var(--surface-3)"/>
+        <rect x="17" y="10" width="6" height="14" rx="3" fill="url(#thermoGrad)"/>
+        <circle cx="20" cy="30" r="8" fill="var(--surface-3)"/>
+        <circle cx="20" cy="30" r="8" fill="url(#thermoGrad)" opacity="0.9"/>
+        <circle cx="20" cy="30" r="3.2" fill="white"/>
+      </svg>
+      <div class="brand-text">
+        <span class="logo">ThermoLab</span>
+        <span class="tagline">Virtual EdTech Laboratory</span>
+      </div>
+    </div>
+
+    <ul class="menu">
+      <li><a id="nav-beranda" href="#" onclick="event.preventDefault(); goTo('beranda')" class="active" aria-label="Buka halaman Beranda">🏠 Beranda</a></li>
+      <li><a id="nav-panduan" href="#" onclick="event.preventDefault(); goTo('panduan')" aria-label="Buka halaman Materi">📚 Materi</a></li>
+      <li><a id="nav-lab" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Buka halaman Simulasi">🧪 Simulasi</a></li>
+      <li><a id="nav-quiz" href="#" onclick="event.preventDefault(); goTo('quiz')" aria-label="Buka halaman Quiz">🧠 Quiz</a></li>
+      <li><a id="nav-challenge" href="#" onclick="event.preventDefault(); goTo('challenge')" aria-label="Buka halaman Challenge">🎮 Challenge</a></li>
+      <li><a id="nav-progress" href="#" onclick="event.preventDefault(); goTo('progress')" aria-label="Buka halaman Progress">📊 Progress</a></li>
+      <li><a id="nav-laporan" href="#" onclick="event.preventDefault(); goTo('laporan')" aria-label="Buka halaman Laporan">📄 Laporan</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <button class="nav-icon-btn" id="soundToggle" type="button" title="Toggle Suara" aria-label="Aktifkan atau matikan suara">🔊 <span class="lbl">Suara</span></button>
+      <button class="nav-icon-btn" id="themeToggle" type="button" title="Toggle Mode Gelap/Terang" aria-label="Ganti mode gelap atau terang">🌓</button>
+      <button class="nav-icon-btn" id="moreMenuBtn" type="button" title="Menu Opsi" aria-label="Buka menu opsi lainnya">⋮</button>
+      <button class="hamburger-btn" id="hamburgerBtn" type="button" title="Buka Menu" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="mainMenu">☰</button>
+    </div>
+  </nav>
+
+  <!-- MOBILE DRAWER -->
+  <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px;">
+      <span class="logo">ThermoLab</span>
+      <button style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text);" onclick="closeDrawer()">✕</button>
+    </div>
+    <ul class="mobile-menu">
+      <li><a onclick="goTo('beranda'); closeDrawer();">🏠 Beranda</a></li>
+      <li><a onclick="goTo('panduan'); closeDrawer();">📚 Materi</a></li>
+      <li><a onclick="goTo('lab-index'); closeDrawer();">🧪 Simulasi</a></li>
+      <li><a onclick="goTo('quiz'); closeDrawer();">🧠 Quiz</a></li>
+      <li><a onclick="goTo('challenge'); closeDrawer();">🎮 Challenge</a></li>
+      <li><a onclick="goTo('progress'); closeDrawer();">📊 Progress</a></li>
+      <li><a onclick="goTo('laporan'); closeDrawer();">📄 Laporan</a></li>
+    </ul>
+  </div>
+
+  <main>
+
+    <!-- ==================== DASHBOARD / BERANDA ==================== -->
+    <section class="page active" id="page-beranda">
+      <!-- HERO BANNER -->
+      <div class="home-hero">
+        <div class="home-hero-main">
+          <div class="eyebrow">🧪 THERMOLAB EDTECH 2.5 &middot; VIRTUAL LABORATORY</div>
+          <h1>Belajar Termodinamika<br><span>melalui Simulasi Interaktif</span></h1>
+          <div style="display:inline-block; margin-bottom: 16px; padding: 6px 14px; background: var(--surface-2); border-radius: var(--radius-full); font-size: 12px; font-weight: 700; color: var(--muted); border: 1px solid var(--border);">
+            👨‍🔬 Dikembangkan oleh <b>Group 3, PESP 25</b>
+          </div>
+          <p>Eksplorasi konsep termodinamika secara mendalam: uji hipotesis, kendalikan variabel fisik, amati grafik dinamis real-time, dan hasilkan laporan praktikum otomatis.</p>
+          <div class="home-actions">
+            <button class="cta-btn" onclick="goTo('lab-index')">🧪 Mulai Eksperimen Lab</button>
+            <button class="secondary-btn" onclick="goTo('panduan')">📚 Pelajari Materi Teori</button>
+          </div>
+          <div class="home-stats">
+            <div><b>6</b><span>Eksperimen Interaktif</span></div>
+            <div><b>100%</b><span>Grafik Dinamis Aktual</span></div>
+            <div><b>Auto</b><span>Laporan Praktikum</span></div>
+          </div>
+        </div>
+        <div class="home-visual">
+          <div class="lab-visual">
+            <div class="flask">⚗️</div>
+            <div class="heat">🔥</div>
+            <div class="thermo">🌡️</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD QUICK PROGRESS WIDGET -->
+      <div class="panel" style="margin-top:28px; background:linear-gradient(135deg, var(--surface), var(--surface-2)); border:1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+          <div>
+            <div style="font-size:12px; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.04em;">PROGRES PEMBELAJARAN KAMU</div>
+            <h3 style="font-size:18px; margin-top:2px;">Status Kelengkapan Praktikum Termodinamika</h3>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-family:'Poppins'; font-size:22px; font-weight:800; color:var(--primary);" id="dashQuickPct">0%</span>
+            <button class="secondary-btn" style="padding:8px 16px; font-size:13px;" onclick="goTo('progress')">Detail Progres →</button>
+          </div>
+        </div>
+        <div class="progress-bar-bg" style="margin-top:14px;">
+          <div class="progress-bar-fill" id="dashQuickBar" style="width:0%;"></div>
+        </div>
+      </div>
+
+      <!-- ENAM EKSPERIMEN UTAMA -->
+      <div style="margin-top: 36px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:18px;">
+          <div>
+            <span style="font-size:11.5px; font-weight:800; color:var(--primary); letter-spacing:0.06em; text-transform:uppercase;">LABORATORIUM VIRTUAL</span>
+            <h2 style="font-size: 24px; margin-top: 2px;">Pilih Eksperimen Termodinamika</h2>
+          </div>
+          <button class="secondary-btn" onclick="goTo('lab-index')">Lihat Semua Lab →</button>
+        </div>
+
+        <div class="exp-grid">
+          <div class="exp-card" onclick="goTo('kalorimetri')">
+            <div class="swatch kalor">🌡️</div>
+            <div class="body">
+              <span class="tag-materi">Hukum Ke-0 · Asas Black</span>
+              <h3 style="margin-top:8px;">Kesetimbangan Termal</h3>
+              <p>Timbang, panaskan, dan campurkan logam misterius ke air dingin untuk menentukan kalor jenis logam.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+
+          <div class="exp-card" onclick="goTo('sislink')">
+            <div class="swatch sislink">🎛️</div>
+            <div class="body">
+              <span class="tag-materi">Hukum I Termodinamika</span>
+              <h3 style="margin-top:8px;">Sistem, Usaha & Kalor</h3>
+              <p>Dorong piston silinder dan kendalikan kalor masuk/keluar untuk membuktikan persamaan ΔU = Q - W.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+
+          <div class="exp-card" onclick="goTo('carnot')">
+            <div class="swatch carnot">🔥</div>
+            <div class="body">
+              <span class="tag-materi">Hukum II · Efisiensi Siklus Ideal</span>
+              <h3 style="margin-top:8px;">Mesin Kalor Carnot</h3>
+              <p>Rakit silinder gas kerja dan temukan hubungan suhu reservoir (T_H & T_C) dengan efisiensi mesin.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+
+          <div class="exp-card" onclick="goTo('konduksi')">
+            <div class="swatch konduksi">🧊</div>
+            <div class="body">
+              <span class="tag-materi">Konduktivitas Termal</span>
+              <h3 style="margin-top:8px;">Perpindahan Kalor</h3>
+              <p>Bandingkan laju perambatan kalor pada Tembaga, Besi, dan Kayu pada kondisi sumber panas yang sama.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+
+          <div class="exp-card" onclick="goTo('peleburan')">
+            <div class="swatch peleburan">🔨</div>
+            <div class="body">
+              <span class="tag-materi">Kalor Laten & Fase</span>
+              <h3 style="margin-top:8px;">Kalor Laten & Perubahan Wujud</h3>
+              <p>Amati kurva pemanasan dari es hingga uap, serta identifikasi plateau suhu saat perubahan wujud.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+
+          <div class="exp-card" onclick="goTo('wujudzat')">
+            <div class="swatch wujud">⚛️</div>
+            <div class="body">
+              <span class="tag-materi">Teori Kinetik Partikel</span>
+              <h3 style="margin-top:8px;">Energi Dalam & Teori Kinetik</h3>
+              <p>Eksplorasi model partikel real-time padat, cair, dan gas saat suhu dinaikkan dan diturunkan.</p>
+              <div class="card-arrow">Buka Laboratorium →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKFLOW TIMELINE -->
+      <div class="panel" style="margin-top:38px; padding:32px; background:var(--surface);">
+        <div style="text-align:center; max-width:600px; margin:0 auto 28px;">
+          <span style="font-size:11.5px; font-weight:800; color:var(--primary); letter-spacing:0.06em; text-transform:uppercase;">ALUR PRAKTIKUM TERARAH</span>
+          <h2 style="font-size:24px; margin-top:4px;">Praktikum dalam 4 Langkah Ilmiah</h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px;">
+          <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px;">
+            <div style="font-family:'Poppins'; font-size:24px; font-weight:800; color:var(--primary);">01</div>
+            <h4 style="font-size:16px; margin:6px 0;">Hipotesis Awal</h4>
+            <p style="font-size:13px; color:var(--muted); margin:0;">Pilih prediksi teoritis sebelum menjalankan simulasi.</p>
+          </div>
+
+          <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px;">
+            <div style="font-family:'Poppins'; font-size:24px; font-weight:800; color:var(--secondary);">02</div>
+            <h4 style="font-size:16px; margin:6px 0;">Jalankan Simulasi</h4>
+            <p style="font-size:13px; color:var(--muted); margin:0;">Atur parameter fisik dan catat titik pengamatan aktual.</p>
+          </div>
+
+          <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px;">
+            <div style="font-family:'Poppins'; font-size:24px; font-weight:800; color:var(--hot);">03</div>
+            <h4 style="font-size:16px; margin:6px 0;">Analisis Grafik</h4>
+            <p style="font-size:13px; color:var(--muted); margin:0;">Evaluasi kurva dinamis dan dapatkan feedback analisis.</p>
+          </div>
+
+          <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px;">
+            <div style="font-family:'Poppins'; font-size:24px; font-weight:800; color:var(--green);">04</div>
+            <h4 style="font-size:16px; margin:6px 0;">Laporan Otomatis</h4>
+            <p style="font-size:13px; color:var(--muted); margin:0;">Susun laporan lengkap, cetak PDF, dan export ke Excel.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANDUAN MATERI ==================== -->
+    <section class="page" id="page-panduan">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">📚 Panduan Materi Termodinamika</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 24px;">Pelajari dasar teori, rumus matematika, dan contoh perhitungan sebelum melakukan praktikum.</p>
+
+      <!-- KALORIMETRI MATERI -->
+      <div class="panel">
+        <h2>🌡️ 1. Hukum Ke-0 & Asas Black: Kalorimetri <span class="step-badge">Dasar</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Menerapkan prinsip Asas Black untuk mencari suhu campuran dan kalor jenis benda (c) yang tidak diketahui jenisnya.</p>
+        <p style="margin-top: 8px;">Menurut Asas Black, jika dua benda dengan suhu berbeda dicampurkan, <b>kalor akan mengalir dari benda panas ke benda dingin</b> hingga suhu keduanya sama (Suhu Kesetimbangan / T_f).</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--cold); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          Q_lepas = Q_terima &nbsp;&implies;&nbsp; m_m &middot; c_m &middot; (T_m - T_f) = m_a &middot; c_a &middot; (T_f - T_a)
+        </div>
+        <p><b>Penjelasan Singkat:</b><br>
+        Benda panas (logam) melepas kalor, air dingin menyerap kalor. Dengan mengukur massa (m), kalor jenis air (c_a = 4.18 J/g&middot;&deg;C), dan perubahan suhu, kita bisa menebak logam apa yang sedang diuji dari nilai c_m nya!</p>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('kalorimetri')">🧪 Mulai Simulasi Kalorimetri &rarr;</button>
+        </div>
+      </div>
+
+      <!-- HUKUM I MATERI -->
+      <div class="panel">
+        <h2>🎛️ 2. Hukum I Termodinamika: Sistem & Lingkungan <span class="step-badge">Menengah</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Menganalisis hukum kekekalan energi gas ideal melalui usaha dan perpindahan kalor.</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--green); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          &Delta;U = Q - W &nbsp;&nbsp;|&nbsp;&nbsp; P · V = n · R · T
+        </div>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('sislink')">🧪 Mulai Simulasi Hukum I →</button>
+        </div>
+      </div>
+      <!-- CARNOT MATERI -->
+      <div class="panel">
+        <h2>🔥 3. Hukum II Termodinamika: Mesin Carnot <span class="step-badge">Pengayaan</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Mengerti prinsip kerja mesin kalor paling ideal di dunia, menghitung efisiensinya berdasarkan selisih suhu reservoir, dan menganalisis mengapa efisiensi 100% mustahil dicapai di dunia nyata.</p>
+        <p style="margin-top: 8px;">Mesin Carnot bekerja di antara dua reservoir suhu: <b>Reservoir Panas (T_H)</b> tempat mesin menyerap kalor (Q_H), dan <b>Reservoir Dingin (T_C)</b> tempat sisa kalor (Q_C) dibuang. Selisih energi ini diubah menjadi <b>Usaha (W)</b>.</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--hot); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          W = Q_H - Q_C &nbsp;&nbsp;|&nbsp;&nbsp; &eta; = (W / Q_H) &times; 100% = (1 - T_C / T_H) &times; 100%
+        </div>
+        <p><b>Penjelasan Variabel:</b></p>
+        <ul>
+          <li><b>Q_H & Q_C:</b> Kalor masuk dan keluar (Joule). Semakin banyak Q yang diubah jadi W, mesin makin bagus.</li>
+          <li><b>W:</b> Usaha mekanik yang dihasilkan (Joule).</li>
+          <li><b>T_H & T_C:</b> Suhu <b>wajib dalam Kelvin (K = &deg;C + 273)</b>.</li>
+          <li><b>&eta; (Efisiensi):</b> Persentase energi yang sukses jadi usaha. Efisiensi akan makin tinggi jika beda suhu (T_H - T_C) makin besar!</li>
+        </ul>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('carnot')">🧪 Mulai Simulasi Carnot &rarr;</button>
+        </div>
+      </div>
+
+      <!-- KONDUKSI MATERI -->
+      <div class="panel">
+        <h2>🧊 4. Perpindahan Kalor: Konduksi & Konduktivitas Termal <span class="step-badge">Dasar</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Membandingkan laju konduksi kalor pada material yang berbeda.</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--amber); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          P = Q / t = (k · A · &Delta;T) / L
+        </div>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('konduksi')">🧪 Mulai Simulasi Konduksi →</button>
+        </div>
+      </div>
+
+      <!-- PELEBURAN MATERI -->
+      <div class="panel">
+        <h2>🔨 5. Kalor Laten & Perubahan Wujud <span class="step-badge">Dasar</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Mengidentifikasi kalor laten pada kurva pemanasan saat terjadi perubahan wujud zat.</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--hot); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          Q_sensibel = m · c · &Delta;T &nbsp;&nbsp;|&nbsp;&nbsp; Q_laten = m · L
+        </div>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('peleburan')">🧪 Mulai Simulasi Kalor Laten →</button>
+        </div>
+      </div>
+
+      <!-- WUJUD ZAT MATERI -->
+      <div class="panel">
+        <h2>⚛️ 6. Energi Dalam & Teori Kinetik <span class="step-badge">Menengah</span></h2>
+        <p><b>Tujuan Pembelajaran:</b> Menjelaskan hubungan suhu terhadap energi kinetik rata-rata partikel zat.</p>
+        <div style="background:var(--surface-2); padding:14px 18px; border-left:4px solid var(--purple); border-radius:6px; font-family:'IBM Plex Mono'; font-weight:700; margin:12px 0;">
+          &lang;E_k&rang; = (3/2) · k_B · T &nbsp;&implies;&nbsp; v_rms &prop; &radic;T
+        </div>
+        <div style="margin-top:14px;">
+          <button class="action-btn" onclick="goTo('wujudzat')">🧪 Mulai Simulasi Energi Dalam →</button>
+        </div>
+      </div>
+
+      <!-- DAFTAR PUSTAKA -->
+      <div class="panel" style="margin-top:4px;">
+        <h2 style="font-size:16px;">📖 Daftar Pustaka</h2>
+        <p style="font-size:12.5px; color:var(--muted); margin-bottom:10px;">Rumus dan konsep pada seluruh modul disusun berdasarkan sumber-sumber berikut:</p>
+        <ol style="font-size:13px; color:var(--text); line-height:1.9; padding-left:20px; margin:0;">
+          <li>Halliday, D., Resnick, R., &amp; Walker, J. <i>Fundamentals of Physics</i>. John Wiley &amp; Sons.</li>
+          <li>Tipler, P. A., &amp; Mosca, G. <i>Physics for Scientists and Engineers</i>. W. H. Freeman.</li>
+          <li>Giancoli, D. C. <i>Physics: Principles with Applications</i>. Pearson.</li>
+          <li>Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi RI. <i>Buku Teks Fisika SMA/MA Kelas XI — Bab Suhu, Kalor, dan Termodinamika</i>.</li>
+          <li>Cengel, Y. A., &amp; Boles, M. A. <i>Thermodynamics: An Engineering Approach</i>. McGraw-Hill.</li>
+        </ol>
+        <p style="font-size:11px; color:var(--muted); margin-top:10px;">Nilai kalor jenis, kalor laten, dan konduktivitas termal pada simulasi adalah nilai pendekatan (approximate) untuk keperluan ilustrasi, dapat sedikit berbeda dari nilai di tabel referensi.</p>
+      </div>
+
+    </section>
+
+    <!-- ==================== LAB INDEX ==================== -->
+    <section class="page" id="page-lab-index">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">🧪 Laboratorium Virtual Termodinamika</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 24px;">Pilih salah satu dari 6 modul laboratorium virtual untuk memulai percobaan.</p>
+
+      <div class="exp-grid">
+        <div class="exp-card" onclick="goTo('kalorimetri')">
+          <div class="swatch kalor">🌡️</div>
+          <div class="body">
+            <h3>Hukum Ke-0 · Kalorimetri</h3>
+            <p>Timbang dan panaskan logam misterius, lalu hitung kalor jenisnya dengan Asas Black.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+
+        <div class="exp-card" onclick="goTo('sislink')">
+          <div class="swatch sislink">🎛️</div>
+          <div class="body">
+            <h3>Hukum I Termodinamika</h3>
+            <p>Dorong piston dan tambahkan kalor untuk membuktikan hukum ΔU = Q - W.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+
+        <div class="exp-card" onclick="goTo('carnot')">
+          <div class="swatch carnot">🔥</div>
+          <div class="body">
+            <h3>Hukum II Termodinamika · Siklus Carnot</h3>
+            <p>Uji efisiensi mesin Carnot dengan berbagai kombinasi suhu T_H dan T_C.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+
+        <div class="exp-card" onclick="goTo('konduksi')">
+          <div class="swatch konduksi">🧊</div>
+          <div class="body">
+            <h3>Perpindahan Kalor · Konduksi</h3>
+            <p>Bandingkan kecepatan laju perambatan panas pada Tembaga, Besi, dan Kayu.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+
+        <div class="exp-card" onclick="goTo('peleburan')">
+          <div class="swatch peleburan">🔨</div>
+          <div class="body">
+            <h3>Kalor Laten & Perubahan Wujud</h3>
+            <p>Amati kurva pemanasan benda dan identifikasi garis mendatar kalor laten.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+
+        <div class="exp-card" onclick="goTo('wujudzat')">
+          <div class="swatch wujud">⚛️</div>
+          <div class="body">
+            <h3>Energi Dalam & Teori Kinetik</h3>
+            <p>Model gerak partikel real-time saat dipanaskan dari padat hingga gas.</p>
+            <div class="card-arrow">Mulai Praktikum →</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: CARNOT ==================== -->
+    <section class="page" id="page-carnot">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">🔥 Hukum II Termodinamika</h2>
+      <p class="exp-subtitle">Simulasi: Siklus Mesin Carnot & efisiensi maksimum</p>
+
+      <div class="rules-card">
+        <div class="rules-title">📋 Aturan Percobaan</div>
+        <ol class="rules-list">
+          <li>Simpan hipotesismu dulu di bawah sebelum menggeser slider apa pun.</li>
+          <li>Geser T_H dan T_C sambil mengamati: warna reservoir, luas area hijau di diagram P–V, dan batang pembagian energi (W vs Q_C) ikut berubah.</li>
+          <li>Tekan ▶ Jalankan (atau ⏩ 1 Siklus). Amati 4 tahap siklus dan titik merah yang berjalan di diagram P–V.</li>
+          <li>Tekan ➕ Catat Data untuk menyimpan kombinasi suhu yang sedang diuji. Ulangi minimal 3 kali dengan kombinasi berbeda.</li>
+          <li>Setelah 3 data tercatat, tulis analisis & kesimpulanmu di panel bawah.</li>
+        </ol>
+        <div class="rules-goal">🎯 Yang dicari: hubungan antara selisih suhu (T_H − T_C) dengan efisiensi mesin (η).</div>
+      </div>
+
+      <!-- TAHAP 1: HIPOTESIS -->
+      <div class="workflow-step-card" id="carnotHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Bagaimana pengaruh perbedaan suhu reservoir (T_H - T_C) terhadap Efisiensi Mesin Carnot?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('carnot', 'A')">
+            <input type="radio" name="carnot_hypo" value="A">
+            A. <b>Efisiensi Meningkat.</b> Semakin besar perbedaan suhu panas (T_H) dan dingin (T_C), mesin bekerja lebih maksimal sehingga efisiensinya naik.
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('carnot', 'B')">
+            <input type="radio" name="carnot_hypo" value="B">
+            B. <b>Efisiensi Menurun.</b> Jika perbedaannya terlalu ekstrem, sebagian energi justru terbuang sehingga efisiensi turun.
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('carnot', 'C')">
+            <input type="radio" name="carnot_hypo" value="C">
+            C. <b>Efisiensi Tetap.</b> Suhu tidak mempengaruhi efisiensi mesin Carnot karena ini adalah mesin ideal (selalu 100%).
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('carnot')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <!-- SIMULATION STAGE -->
+      <div class="lab-layout">
+        <div class="engine-card">
+          <canvas id="engineCanvas" width="640" height="360" style="width:100%; height:auto;"></canvas>
+        </div>
+        <div class="controls-card">
+          <div class="result-box">
+            <div class="num" id="effVal">—</div>
+            <div class="lbl">Efisiensi Carnot (&eta;)</div>
+          </div>
+          <div class="slider-group">
+            <label>Suhu Reservoir Panas (T_H) <span class="val" id="thVal">700 K</span></label>
+            <input type="range" id="thSlider" min="450" max="950" value="700" step="10">
+          </div>
+          <div class="slider-group">
+            <label>Suhu Reservoir Dingin (T_C) <span class="val" id="tcVal">300 K</span></label>
+            <input type="range" id="tcSlider" min="250" max="420" value="300" step="10">
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" id="carnotPlayBtn">▶ Jalankan</button>
+            <button class="action-btn ghost" id="carnotStepBtn">⏩ 1 Siklus</button>
+          </div>
+
+          <div class="result-box" style="padding: 12px; background: var(--surface-2); color: var(--text); border:1px solid var(--border);">
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+              <div><div class="num" id="carnotQhVal" style="font-size:17px; color:var(--hot);">—</div><div class="lbl">Q_H (J)</div></div>
+              <div><div class="num" id="carnotWVal" style="font-size:17px; color:var(--primary);">—</div><div class="lbl">W (J)</div></div>
+              <div><div class="num" id="carnotQcVal" style="font-size:17px; color:var(--cold);">—</div><div class="lbl">Q_C (J)</div></div>
+            </div>
+          </div>
+
+          <button class="action-btn" id="carnotRecordBtn">➕ Catat Data Eksperimen</button>
+          <button class="action-btn ghost" onclick="resetCarnot()">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- SIMULATION RESULT BANNER -->
+      <div class="sim-result-card" id="carnotResultCard">
+        <h3>✓ SIMULASI CARNOT SELESAI</h3>
+        <p>Simulasi berhasil dijalankan! Minimal 3 kondisi data eksperimen Carnot telah berhasil dicatat ke dalam dataset.</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal Kamu:</h4>
+            <p id="carnotHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Data Aktual Simulasi:</h4>
+            <p id="carnotActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="action-btn" onclick="scrollToElement('carnotAnalysisPanel')">🔍 Lihat Analisis & Kesimpulan</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('carnot')">📊 Export Data ke Excel</button>
+        </div>
+      </div>
+
+      <!-- DATA & CHART -->
+      <div class="data-layout">
+        <div class="panel" id="carnotAnalysisPanel">
+          <h2>Data Pengamatan Carnot</h2>
+          <table>
+            <thead>
+              <tr><th>No</th><th>T_H (K)</th><th>T_C (K)</th><th>Q_H</th><th>W</th><th>Q_C</th><th>&eta; (%)</th></tr>
+            </thead>
+            <tbody id="carnotBody"><tr class="empty-row"><td colspan="7">Belum ada data dicatat.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Hasil Eksperimen</h3>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">Jelaskan hubungan antara selisih suhu (T_H - T_C) dengan efisiensi mesin Carnot berdasarkan grafik data aktual.</p>
+            <textarea id="carnotAnalysisText" placeholder="Tulis analisis hasil eksperimen kamu di sini..."></textarea>
+            <button class="action-btn" style="margin-top: 8px;" onclick="checkAnalysis('carnot')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="carnotAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan Praktikum</h3>
+            <textarea id="carnotConclusionText" placeholder="Tulis kesimpulan akhir praktikum..."></textarea>
+            <button class="action-btn ghost" style="margin-top: 8px;" onclick="autoConclude('carnot')">✨ Buat Kesimpulan Otomatis Dari Data</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grafik Efisiensi vs Selisih Suhu (&Delta;T)</h2>
+          <div class="chart-container">
+            <canvas id="carnotChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: KALORIMETRI ==================== -->
+    <section class="page" id="page-kalorimetri">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">🌡️ Hukum Ke-0 Termodinamika & Asas Black</h2>
+      <p class="exp-subtitle">Simulasi: Kalorimeter — kesetimbangan termal dan kekekalan kalor</p>
+
+      <div class="workflow-step-card" id="caloHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Saat logam panas dicampurkan dengan air dingin di dalam kalorimeter, apakah kalor yang dilepas logam sama dengan kalor yang diterima air?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('calo', 'A')">
+            <input type="radio" name="calo_hypo" value="A">
+            A. <b>Ya, Kalor Kekal (Asas Black).</b> Panas yang dibuang logam = panas yang diserap air. Mereka akan berbagi energi sampai suhunya sama persis (setimbang).
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('calo', 'B')">
+            <input type="radio" name="calo_hypo" value="B">
+            B. <b>Tidak.</b> Karena wadah tertutup, sebagian panas akan lenyap. Suhu air tidak akan naik sebesar panas yang hilang dari logam.
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('calo')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <div class="rules-card" style="margin-bottom:14px;">
+        <div class="rules-title">💡 Cara Main</div>
+        <p style="font-size:13px; color:var(--muted); margin:0 0 10px;">Ikuti langkah dari atas ke bawah. Alat yang bisa digunakan akan diberi tanda kotak berwarna. Kotak kuning di bawah akan selalu memberi tahu tindakan berikutnya.</p>
+        <ol class="calo-steps" id="caloStepsList">
+          <li data-step="1">1. Timbang logam di neraca.</li>
+          <li data-step="2">2. Ukur suhu air awal.</li>
+          <li data-step="3">3. Panaskan logam.</li>
+          <li data-step="4">4. Pindahkan pakai tang.</li>
+          <li data-step="5">5. Aduk &amp; catat suhu.</li>
+          <li data-step="6">6. Hitung &amp; tebak logam.</li>
+        </ol>
+      </div>
+
+      <div class="lab-layout">
+        <div class="engine-card" style="padding:18px;">
+          <div class="calo-bench" id="caloBench">
+
+            <div class="calo-station" id="caloStationNeraca" data-station="neraca">
+              <div class="calo-platform"></div>
+              <div class="calo-readout" id="caloNeracaReadout"></div>
+              <div class="calo-label">Neraca</div>
+            </div>
+
+            <div class="calo-station" id="caloStationPemanas" data-station="pemanas">
+              <div class="calo-heater"><div class="calo-flame"></div></div>
+              <div class="calo-lamp"></div>
+              <div class="calo-readout" id="caloPemanasReadout"></div>
+              <div class="calo-label">Pembakar Spiritus</div>
+            </div>
+
+            <div class="calo-station" id="caloStationKalo" data-station="kalorimeter">
+              <div class="calo-cup"><div class="calo-lid"></div></div>
+              <div class="calo-readout" id="caloKaloReadout"></div>
+              <div class="calo-label">Kalorimeter</div>
+            </div>
+
+            <div class="calo-tray">
+              <div class="calo-item-wrap">
+                <div class="calo-eq" id="caloEqLogam" data-item="logam">
+                  <div class="calo-logam-box" id="caloLogamBox">Logam X</div>
+                  <div class="calo-tang-overlay" id="caloTangOverlay">🛠️</div>
+                </div>
+                <div class="calo-slot-label">Sampel logam</div>
+              </div>
+              <div class="calo-item-wrap">
+                <div class="calo-eq" id="caloEqTermo" data-item="termometer">
+                  <div class="calo-thermo-body"><div class="calo-thermo-fill" id="caloThermoFill"></div></div>
+                  <div class="calo-thermo-bulb"></div>
+                </div>
+                <div class="calo-slot-label">Termometer</div>
+              </div>
+              <div class="calo-item-wrap">
+                <div class="calo-eq" id="caloEqTang" data-item="tang">🛠️</div>
+                <div class="calo-slot-label">Tang penjepit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="controls-card">
+          <div class="result-box">
+            <div class="num" id="caloReadoutTf">—</div>
+            <div class="lbl">Suhu Kesetimbangan (T_f)</div>
+          </div>
+          <div class="calo-instruction" id="caloInstruction">Klik sampel logam untuk memegangnya.</div>
+          <div id="caloActionArea"></div>
+          <button class="action-btn ghost" onclick="resetCalo()">↺ Reset Eksperimen</button>
+        </div>
+      </div>
+
+      <div class="sim-result-card" id="caloResultCard">
+        <h3>✓ SIMULASI KALORIMETRI SELESAI</h3>
+        <p>Pencampuran termal kalorimetri telah selesai dan suhu kesetimbangan berhasil tercatat!</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal:</h4>
+            <p id="caloHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Aktual:</h4>
+            <p id="caloActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn" onclick="scrollToElement('caloAnalysisPanel')">🔍 Lihat Analisis</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('calo')">📊 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="data-layout">
+        <div class="panel" id="caloAnalysisPanel">
+          <h2>Data Hasil Kalorimetri</h2>
+          <table>
+            <thead>
+              <tr><th>Besaran Fisik</th><th>Nilai Terukur</th></tr>
+            </thead>
+            <tbody id="caloDataBody"><tr class="empty-row"><td colspan="2">Belum ada data pencampuran.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Data Kalorimetri</h3>
+            <textarea id="caloAnalysisText" placeholder="Jelaskan hubungan perbandingan kalor yang dilepas logam dan diserap air..."></textarea>
+            <button class="action-btn" style="margin-top:8px;" onclick="checkAnalysis('calo')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="caloAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan</h3>
+            <textarea id="caloConclusionText" placeholder="Kesimpulan praktikum kalorimetri..."></textarea>
+            <button class="action-btn ghost" style="margin-top:8px;" onclick="autoConclude('calo')">✨ Buat Kesimpulan Otomatis</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grafik Kurva Kesetimbangan Suhu</h2>
+          <div class="chart-container">
+            <canvas id="caloChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: KONDUKSI ==================== -->
+    <section class="page" id="page-konduksi">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">🧊 Perpindahan Kalor</h2>
+      <p class="exp-subtitle">Simulasi: Konduksi pada batang tembaga, besi, dan kayu</p>
+
+      <div class="rules-card">
+        <div class="rules-title">📋 Aturan Percobaan</div>
+        <ol class="rules-list">
+          <li>Pilih satu material batang, lalu tekan ▶ Mulai Pemanasan. Biarkan berjalan minimal 10–20 detik.</li>
+          <li>Amati warna batang: bagian dekat api memanas lebih dulu, lalu panas merambat ke kanan.</li>
+          <li>Tekan ➕ Catat Data Material untuk menyimpan suhu ujung batang saat ini.</li>
+          <li>Tekan ↺ Reset Batang, ganti material, lalu ulangi dengan suhu api yang sama.</li>
+          <li>Bandingkan ketiga material. Kurva yang paling cepat naik menghantarkan kalor paling baik.</li>
+        </ol>
+        <div class="rules-goal">🎯 Yang dicari: material mana (Tembaga, Besi, atau Kayu) yang menghantarkan panas paling cepat.</div>
+      </div>
+
+      <div class="workflow-step-card" id="condHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Di antara Tembaga, Besi, dan Kayu, manakah material yang menghantarkan panas paling cepat ke ujung batang?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('cond', 'A')">
+            <input type="radio" name="cond_hypo" value="A">
+            A. <b>Tembaga</b> menghantarkan panas paling cepat karena memiliki konduktivitas termal (k) paling tinggi.
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('cond', 'B')">
+            <input type="radio" name="cond_hypo" value="B">
+            B. <b>Kayu</b> menghantarkan panas paling cepat.
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('cond')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <div class="lab-layout">
+        <div class="engine-card">
+          <canvas id="condCanvas" width="640" height="360" style="width:100%; height:auto;"></canvas>
+        </div>
+        <div class="controls-card">
+          <div class="slider-group">
+            <label>Pilih Material Batang</label>
+            <select id="condMaterial">
+              <option value="0.85">Tembaga (k = 0.85 W/m·K)</option>
+              <option value="0.35">Besi (k = 0.35 W/m·K)</option>
+              <option value="0.05">Kayu (k = 0.05 W/m·K)</option>
+            </select>
+          </div>
+          <div class="slider-group">
+            <label>Suhu Sumber Api (°C) <span class="val" id="condFlameVal">200°C</span></label>
+            <input type="range" id="condFlameSlider" min="100" max="350" value="200" step="10">
+          </div>
+          <div class="result-box">
+            <div class="num" id="condEndVal">25.0°C</div>
+            <div class="lbl">Suhu Ujung Batang</div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" id="condPlayBtn">▶ Mulai Pemanasan</button>
+            <button class="action-btn ghost" onclick="resetCondSim()">↺ Reset Batang</button>
+          </div>
+          <button class="action-btn" id="condRecordBtn">➕ Catat Data Material</button>
+        </div>
+      </div>
+
+      <div class="sim-result-card" id="condResultCard">
+        <h3>✓ SIMULASI KONDUKSI SELESAI</h3>
+        <p>Ketiga jenis material (Tembaga, Besi, Kayu) berhasil diuji dan dicatat!</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal:</h4>
+            <p id="condHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Data Aktual:</h4>
+            <p id="condActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn" onclick="scrollToElement('condAnalysisPanel')">🔍 Lihat Analisis</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('cond')">📊 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="data-layout">
+        <div class="panel" id="condAnalysisPanel">
+          <h2>Data Pengamatan Konduksi</h2>
+          <table>
+            <thead>
+              <tr><th>No</th><th>Material</th><th>Waktu (s)</th><th>Suhu Ujung (°C)</th></tr>
+            </thead>
+            <tbody id="condBody"><tr class="empty-row"><td colspan="4">Belum ada data dicatat.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Grafik Konduksi</h3>
+            <textarea id="condAnalysisText" placeholder="Bandingkan kemampuan menghantarkan panas antar material berdasarkan data..."></textarea>
+            <button class="action-btn" style="margin-top:8px;" onclick="checkAnalysis('cond')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="condAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan</h3>
+            <textarea id="condConclusionText" placeholder="Kesimpulan praktikum konduksi..."></textarea>
+            <button class="action-btn ghost" style="margin-top:8px;" onclick="autoConclude('cond')">✨ Buat Kesimpulan Otomatis</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grafik Perbandingan Suhu Ujung</h2>
+          <div class="chart-container">
+            <canvas id="condChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: PELEBURAN ==================== -->
+    <section class="page" id="page-peleburan">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">🔨 Kalor Laten & Perubahan Wujud</h2>
+      <p class="exp-subtitle">Simulasi: Tungku peleburan es, lilin parafin, dan timah</p>
+
+      <div class="rules-card">
+        <div class="rules-title">📋 Aturan Percobaan</div>
+        <ol class="rules-list">
+          <li>Pilih bahan (es, lilin, atau timah), atur daya tungku, lalu tekan ▶ Mulai Pemanasan. Tiap bahan punya suhu awal, titik lebur/didih, dan kalor laten berbeda.</li>
+          <li>Perhatikan suhu naik saat fase padat. Saat mencapai titik lebur, suhu akan mendatar sementara wujud berubah.</li>
+          <li>Setelah bahan mencair, suhu naik lagi. Di titik didih, grafik kembali mendatar.</li>
+          <li>Tekan ➕ Catat Titik Pemanasan beberapa kali sepanjang proses, termasuk saat grafik sedang mendatar.</li>
+          <li>Setelah data cukup, tulis analisis & kesimpulan mengapa grafik bisa mendatar.</li>
+        </ol>
+        <div class="rules-goal">🎯 Yang dicari: kenapa suhu tidak naik terus selama benda melebur / mendidih (kalor laten).</div>
+      </div>
+
+      <div class="workflow-step-card" id="furnaceHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Saat benda sedang mencair (melebur) atau mendidih, apakah suhunya terus naik atau mendatar?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('furnace', 'A')">
+            <input type="radio" name="furnace_hypo" value="A">
+            A. Suhunya akan <b>Mendatar (Tetap)</b> selama proses perubahan wujud berlangsung karena energi digunakan sebagai kalor laten.
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('furnace', 'B')">
+            <input type="radio" name="furnace_hypo" value="B">
+            B. Suhunya akan <b>Terus Naik Cepat</b> tanpa pernah mendatar.
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('furnace')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <div class="lab-layout">
+        <div class="engine-card">
+          <canvas id="furnaceCanvas" width="640" height="360" style="width:100%; height:auto;"></canvas>
+        </div>
+        <div class="controls-card">
+          <div class="slider-group">
+            <label>Bahan Pemanasan</label>
+            <select id="furnaceMaterialSelect">
+              <option value="es">Es Batu (Lebur 0°C · Didih 100°C)</option>
+              <option value="lilin">Lilin Parafin (Lebur 60°C · Didih ±300°C)</option>
+              <option value="timah">Logam Timah (Lebur 232°C · Didih 2602°C)</option>
+            </select>
+          </div>
+          <div class="slider-group">
+            <label>Daya Pemanas Tungku <span class="val" id="furnacePowerVal">60%</span></label>
+            <input type="range" id="furnacePowerSlider" min="10" max="100" value="60" step="5">
+          </div>
+
+          <div class="result-box">
+            <div class="num" id="furnaceTempVal">20°C</div>
+            <div class="lbl">Fase: <span id="phaseTagBadge" style="color:var(--hot-2); font-weight:700;">Padat</span></div>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" id="furnacePlayBtn">▶ Mulai Pemanasan</button>
+            <button class="action-btn ghost" onclick="resetFurnace()">↺ Reset</button>
+          </div>
+          <button class="action-btn" id="furnaceRecordBtn">➕ Catat Titik Pemanasan</button>
+        </div>
+      </div>
+
+      <div class="sim-result-card" id="furnaceResultCard">
+        <h3>✓ SIMULASI TUNGKU PELEBURAN SELESAI</h3>
+        <p>Data kurva pemanasan dari fase padat hingga mendidih berhasil dicatat!</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal:</h4>
+            <p id="furnaceHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Data Aktual:</h4>
+            <p id="furnaceActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn" onclick="scrollToElement('furnaceAnalysisPanel')">🔍 Lihat Analisis</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('furnace')">📊 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="data-layout">
+        <div class="panel" id="furnaceAnalysisPanel">
+          <h2>Data Kurva Pemanasan</h2>
+          <table>
+            <thead>
+              <tr><th>No</th><th>Bahan</th><th>Waktu (s)</th><th>Suhu (°C)</th><th>Fase</th></tr>
+            </thead>
+            <tbody id="furnaceBody"><tr class="empty-row"><td colspan="5">Belum ada data dicatat.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Kurva & Kalor Laten</h3>
+            <textarea id="furnaceAnalysisText" placeholder="Jelaskan mengapa grafik mendatar saat terjadi perubahan wujud..."></textarea>
+            <button class="action-btn" style="margin-top:8px;" onclick="checkAnalysis('furnace')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="furnaceAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan</h3>
+            <textarea id="furnaceConclusionText" placeholder="Kesimpulan pemanasan tungku..."></textarea>
+            <button class="action-btn ghost" style="margin-top:8px;" onclick="autoConclude('furnace')">✨ Buat Kesimpulan Otomatis</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grafik Kurva Pemanasan (Suhu vs Waktu)</h2>
+          <div class="chart-container">
+            <canvas id="furnaceChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: WUJUD ZAT ==================== -->
+    <section class="page" id="page-wujudzat">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">⚛️ Energi Dalam & Teori Kinetik</h2>
+      <p class="exp-subtitle">Simulasi: Gerak partikel pada wujud padat, cair, dan gas</p>
+
+      <div class="rules-card">
+        <div class="rules-title">📋 Aturan Percobaan</div>
+        <ol class="rules-list">
+          <li>Geser slider suhu ke arah ❄️ dingin. Amati partikel rapat dan hanya bergetar di tempat (padat).</li>
+          <li>Naikkan suhu ke area tengah. Partikel mulai bergeser lebih bebas (cair).</li>
+          <li>Geser ke arah 🔥 panas. Partikel bergerak jauh lebih cepat dan menyebar (gas).</li>
+          <li>Tekan ➕ Catat Data Fase Partikel di tiap fase (padat, cair, gas) yang kamu amati.</li>
+          <li>Bandingkan kecepatan partikel di ketiga fase, lalu tulis analisismu.</li>
+        </ol>
+        <div class="rules-goal">🎯 Yang dicari: hubungan antara suhu dengan energi kinetik dan kecepatan gerak partikel.</div>
+      </div>
+
+      <div class="workflow-step-card" id="womHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Bagaimana hubungan antara kenaikan suhu dengan energi kinetik dan kecepatan gerak partikel zat?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('wom', 'A')">
+            <input type="radio" name="wom_hypo" value="A">
+            A. Semakin tinggi suhu, energi kinetik rata-rata partikel <b>Semakin Besar</b> dan geraknya <b>Semakin Cepat</b>.
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('wom', 'B')">
+            <input type="radio" name="wom_hypo" value="B">
+            B. Kenaikan suhu tidak berpengaruh pada kecepatan partikel.
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('wom')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <div class="lab-layout">
+        <div class="engine-card">
+          <canvas id="womCanvas" width="540" height="340" style="width:100%; height:auto;"></canvas>
+        </div>
+        <div class="controls-card">
+          <div class="slider-group">
+            <label>Kontrol Suhu Partikel (°C)</label>
+            <input type="range" id="womHeatSlider" min="-50" max="250" value="25" step="5">
+          </div>
+          <div class="result-box">
+            <div class="num" id="womTempVal">25°C</div>
+            <div class="lbl">Fase: <span id="womPhaseTag" style="color:var(--hot-2); font-weight:700;">Cair</span></div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" id="womPlayBtn">▶ Jalankan Simulasi</button>
+            <button class="action-btn ghost" onclick="resetWom()">↺ Reset</button>
+          </div>
+          <button class="action-btn" id="womRecordBtn">➕ Catat Data Fase Partikel</button>
+        </div>
+      </div>
+
+      <div class="sim-result-card" id="womResultCard">
+        <h3>✓ SIMULASI WUJUD ZAT SELESAI</h3>
+        <p>Pengamatan gerak partikel padat, cair, dan gas telah dicatat!</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal:</h4>
+            <p id="womHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Data Aktual:</h4>
+            <p id="womActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn" onclick="scrollToElement('womAnalysisPanel')">🔍 Lihat Analisis</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('wom')">📊 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="data-layout">
+        <div class="panel" id="womAnalysisPanel">
+          <h2>Data Pengamatan Partikel</h2>
+          <table>
+            <thead>
+              <tr><th>No</th><th>Suhu (°C)</th><th>Fase</th><th>Kecepatan Relatif</th></tr>
+            </thead>
+            <tbody id="womBody"><tr class="empty-row"><td colspan="4">Belum ada data dicatat.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Teori Kinetik</h3>
+            <textarea id="womAnalysisText" placeholder="Jelaskan hubungan suhu dengan susunan dan energi kinetik partikel..."></textarea>
+            <button class="action-btn" style="margin-top:8px;" onclick="checkAnalysis('wom')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="womAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan</h3>
+            <textarea id="womConclusionText" placeholder="Kesimpulan praktikum wujud zat..."></textarea>
+            <button class="action-btn ghost" style="margin-top:8px;" onclick="autoConclude('wom')">✨ Buat Kesimpulan Otomatis</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Grafik Kecepatan Partikel vs Suhu</h2>
+          <div class="chart-container">
+            <canvas id="womChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== EXPERIMENT: HUKUM I ==================== -->
+    <section class="page" id="page-sislink">
+      <a class="back-link" href="#" onclick="event.preventDefault(); goTo('lab-index')" aria-label="Kembali ke daftar Laboratorium">← Kembali ke Laboratorium</a>
+      <h2 style="margin-bottom: 4px;">🎛️ Hukum I Termodinamika</h2>
+      <p class="exp-subtitle">Simulasi: Sistem, lingkungan, dan ΔU = Q − W pada gas ideal</p>
+
+      <div class="rules-card">
+        <div class="rules-title">📋 Aturan Percobaan</div>
+        <ol class="rules-list">
+          <li>Gas di dalam silinder adalah <b>sistem</b>. Piston & sekitarnya adalah <b>lingkungan</b>.</li>
+          <li>Dorong piston ⇔ ke dalam tanpa menekan tombol kalor. Perhatikan T dan U tetap naik — lingkungan melakukan usaha pada gas.</li>
+          <li>Tarik piston ⇔ keluar. Suhu turun — gas melakukan usaha ke lingkungan.</li>
+          <li>Diamkan piston, lalu klik 🔥 Tambah Kalor atau ❄️ Kurangi Kalor. U berubah murni dari kalor, tanpa usaha.</li>
+          <li>Tekan ➕ Catat Kondisi Gas 3 kali dengan kombinasi berbeda, lalu bandingkan ΔU dengan Q − W.</li>
+        </ol>
+        <div class="rules-goal">🎯 Yang dicari: pembuktian bahwa ΔU = Q − W selalu berlaku, apa pun kombinasi aksinya.</div>
+      </div>
+
+      <div class="workflow-step-card" id="slHypoCard">
+        <div class="workflow-step-header">
+          <span class="step-badge">Tahap 1 — Hipotesis Awal</span>
+        </div>
+        <h3 style="font-size:16px;">Berdasarkan Hukum I Termodinamika (&Delta;U = Q - W), apa yang terjadi pada energi dalam (&Delta;U) jika gas diberikan Kalor Q dan melakukan Usaha W ke lingkungan?</h3>
+        <div class="hypothesis-options">
+          <label class="hypothesis-option" onclick="selectHypothesis('sl', 'A')">
+            <input type="radio" name="sl_hypo" value="A">
+            A. Perubahan energi dalam &Delta;U persis sama dengan <b>selisih antara Kalor Q dan Usaha W</b> (&Delta;U = Q - W).
+          </label>
+          <label class="hypothesis-option" onclick="selectHypothesis('sl', 'B')">
+            <input type="radio" name="sl_hypo" value="B">
+            B. Energi dalam &Delta;U selalu bernilai nol.
+          </label>
+        </div>
+        <button class="action-btn" onclick="saveHypothesis('sl')">💾 Simpan Hipotesis & Mulai Simulasi</button>
+      </div>
+
+      <div class="lab-layout">
+        <div class="engine-card">
+          <div style="position:relative; width:100%; height:320px;" id="slStage">
+            <canvas id="slCanvas" width="560" height="300" style="width:100%; height:auto;"></canvas>
+            <div id="slPiston" style="position:absolute; top:40px; left:300px; width:14px; height:220px; background:linear-gradient(90deg,#e2e8f0,#94a3b8); border:2px solid #4b5563; border-radius:4px; cursor:grab; touch-action:none;">
+              <div style="position:absolute; top:-22px; left:-4px; font-size:14px;">⇔</div>
+            </div>
+          </div>
+        </div>
+        <div class="controls-card">
+          <button class="action-btn" id="slStartBtn">▶ Mulai Praktikum</button>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" style="background:var(--hot);" id="slHeatBtn">🔥 Tambah Kalor (+Q)</button>
+            <button class="action-btn" style="background:var(--cold);" id="slCoolBtn">❄️ Kurangi Kalor (-Q)</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div class="result-box" style="padding:10px;"><div class="num" id="slP" style="font-size:18px;">1.0</div><div class="lbl">Tekanan (P)</div></div>
+            <div class="result-box" style="padding:10px;"><div class="num" id="slV" style="font-size:18px;">13 L</div><div class="lbl">Volume (V)</div></div>
+            <div class="result-box" style="padding:10px;"><div class="num" id="slT" style="font-size:18px;">300 K</div><div class="lbl">Suhu (T)</div></div>
+            <div class="result-box" style="padding:10px;"><div class="num" id="slU" style="font-size:18px;">50 J</div><div class="lbl">Energi Dalam (U)</div></div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:14px; border-radius:10px; text-align:center; font-family:'IBM Plex Mono'; font-size:14px;">
+            &Delta;U = <span id="slDeltaU" style="color:var(--hot-2);">0</span> J &nbsp;|&nbsp; Q - W = <span id="slQMinusW" style="color:var(--green);">0</span> J
+            <div id="slCheck" style="font-size:12px; margin-top:4px; color:#4ade80;">✓ Hukum I Terpenuhi</div>
+          </div>
+
+          <button class="action-btn" id="slRecordBtn">➕ Catat Kondisi Gas (0/3)</button>
+          <button class="action-btn ghost" onclick="resetSislink()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="sim-result-card" id="slResultCard">
+        <h3>✓ SIMULASI HUKUM I SELESAI</h3>
+        <p>Data eksperimen Hukum I Termodinamika berhasil dicatat!</p>
+        <div class="result-comparison-grid">
+          <div class="comparison-box">
+            <h4>Hipotesis Awal:</h4>
+            <p id="slHypoSummary">—</p>
+          </div>
+          <div class="comparison-box">
+            <h4>Hasil Data Aktual:</h4>
+            <p id="slActualSummary">—</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn" onclick="scrollToElement('slAnalysisPanel')">🔍 Lihat Analisis</button>
+          <button class="action-btn ghost" onclick="exportExperimentExcel('sl')">📊 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="data-layout">
+        <div class="panel" id="slAnalysisPanel">
+          <h2>Data Kondisi Termodinamika</h2>
+          <table>
+            <thead>
+              <tr><th>No</th><th>Aksi</th><th>P</th><th>V</th><th>T</th><th>&Delta;U</th><th>Q - W</th></tr>
+            </thead>
+            <tbody id="slBody"><tr class="empty-row"><td colspan="7">Belum ada data dicatat.</td></tr></tbody>
+          </table>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Analisis Hukum I</h3>
+            <textarea id="slAnalysisText" placeholder="Buktikan kesamaan antara ΔU dan Q - W dari data pengamatan..."></textarea>
+            <button class="action-btn" style="margin-top:8px;" onclick="checkAnalysis('sl')">Periksa Analisis</button>
+            <div class="analysis-checker-box" id="slAnalysisFeedback" style="display:none;"></div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size:16px;">Kesimpulan</h3>
+            <textarea id="slConclusionText" placeholder="Kesimpulan Hukum I Termodinamika..."></textarea>
+            <button class="action-btn ghost" style="margin-top:8px;" onclick="autoConclude('sl')">✨ Buat Kesimpulan Otomatis</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Diagram P-V (Tekanan vs Volume)</h2>
+          <div class="chart-container">
+            <canvas id="slChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== QUIZ ==================== -->
+    <section class="page" id="page-quiz">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">🧠 Quiz Termodinamika Berkelanjutan</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 20px;">Progress dan jawaban kamu tersimpan secara otomatis di browser sehingga tidak akan hilang.</p>
+
+      <div class="quiz-tabs" id="quizTabs"></div>
+
+      <div class="panel" id="quizTopicHead">
+        <h3 id="quizTopicTitle">Hukum II (Carnot)</h3>
+        <p id="quizTopicDesc" style="color:var(--muted); font-size:13.5px; margin-top:4px;">Uji pemahamanmu tentang efisiensi dan siklus Carnot.</p>
+      </div>
+
+      <div class="quiz-grid" id="quizGrid"></div>
+
+      <div class="panel" style="margin-top: 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+        <div>
+          <h3 id="quizScoreTitle">Skor Quiz Carnot</h3>
+          <p style="color:var(--muted); font-size:13px; margin-top:2px;">Progres quiz tersimpan secara otomatis di browser.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div style="font-size:28px; font-weight:800; color:var(--primary);" id="quizScoreVal">0/4</div>
+          <button class="action-btn ghost" onclick="resetActiveQuiz()">↺ Ulangi Quiz Topik Ini</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CHALLENGE GAME ==================== -->
+    <section class="page" id="page-challenge">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">🎮 ThermoLab Challenge</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 24px;">Game kuis melawan monster: main solo atau bertanding antar regu di satu layar!</p>
+
+      <div class="challenge-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="step-badge" style="background:rgba(255,255,255,0.18); color:white;">EDTECH CHALLENGE</span>
+          <div style="font-family:'IBM Plex Mono'; font-weight:700; font-size:17px;" id="gameTimer">⏱️ 60s</div>
+        </div>
+
+        <!-- MODE SELECTION -->
+        <div id="gameModeSelectView" style="margin-top:24px;">
+          <h2 style="font-size: 28px; margin-bottom: 10px;">👾 Lawan Monster Entropi!</h2>
+          <p style="color:#cbd5e1; font-size:15px; margin-bottom: 24px;">Jawab soal termodinamika dengan benar untuk melukai monster. Makin banyak yang benar dan makin cepat menjawab, makin besar damage-nya!</p>
+          <div style="display:flex; gap:14px; flex-wrap:wrap;">
+            <button class="cta-btn" style="background:linear-gradient(120deg, #f59e0b, #ef4444);" onclick="startSoloChallenge()">⚡ Solo vs Monster (60 detik)</button>
+            <button class="secondary-btn" style="background:white; color:#0f172a;" onclick="showTeamRoomView()">👥 Battle Regu (Bergantian di 1 Layar)</button>
+          </div>
+        </div>
+
+        <!-- TEAM SETUP VIEW -->
+        <div id="gameTeamRoomView" style="display:none; margin-top:24px;">
+          <h3 style="font-size:20px;">👥 Battle Regu vs Monster</h3>
+          <p style="color:#cbd5e1; font-size:14px;">Regu bergantian menjawab di satu layar (cocok diproyeksikan di kelas). Tiap soal punya batas 20 detik, jawab lebih cepat = damage lebih besar.</p>
+          <div style="background:rgba(255,255,255,0.08); padding:20px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); margin-top:16px; max-width:460px;">
+            <label style="font-size:13px; font-weight:700;">Jumlah regu</label>
+            <select id="teamCountSelect" onchange="updateTeamInputs()" style="margin:6px 0 12px; background:rgba(255,255,255,0.9); color:#0f172a;">
+              <option value="2">2 Regu</option><option value="3" selected>3 Regu</option><option value="4">4 Regu</option>
+            </select>
+            <div id="teamNameInputs"></div>
+            <button class="cta-btn" style="margin-top:8px;" onclick="startTeamBattle()">⚔️ Mulai Battle</button>
+            <button class="secondary-btn" style="margin-top:8px; background:transparent; color:white; border:1px solid rgba(255,255,255,0.4);" onclick="resetChallengeGame()">← Kembali</button>
+          </div>
+        </div>
+
+        <!-- ACTIVE BATTLE -->
+        <div id="gameActiveQuestionView" style="display:none; margin-top:20px;">
+          <div class="monster-arena">
+            <div class="monster-emoji" id="monsterEmoji">👾</div>
+            <div class="monster-info">
+              <div style="font-weight:800; font-size:15px;">Entropi si Monster Panas</div>
+              <div class="monster-hp-bar"><div class="monster-hp-fill" id="monsterHpFill"></div></div>
+              <div id="monsterHpText" style="font-family:'IBM Plex Mono'; font-size:12px; color:#fca5a5;">HP</div>
+            </div>
+          </div>
+          <div class="team-chips" id="teamChips"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:#93c5fd; margin-top:10px;">
+            <span id="gameQuestionTracker">Soal 1</span>
+            <span id="gameTurnLabel" style="font-weight:800; color:#fde68a;"></span>
+          </div>
+          <div class="kq-timer-wrap" id="chTimerWrap"></div>
+          <h2 style="font-size:21px; margin-top:10px; text-align:center;" id="gameQuestionText">Loading soal...</h2>
+          <div class="kq-grid" id="gameOptionsContainer"></div>
+          <div id="gameFeedback" style="margin-top:12px; min-height:22px; font-weight:700; font-size:14px; text-align:center;"></div>
+        </div>
+
+        <!-- GAME OVER -->
+        <div id="gameOverView" style="display:none; margin-top:24px; text-align:center;">
+          <div style="font-size:64px;" id="gameOverEmoji">🏆</div>
+          <h2 style="font-size:26px;" id="gameOverTitle">PERMAINAN SELESAI</h2>
+          <p style="font-size:16px; color:#cbd5e1; margin:8px 0;" id="gameOverSub"></p>
+          <div id="gamePodium"></div>
+          <div style="background:rgba(255,255,255,0.08); border-radius:14px; padding:20px; margin-top:16px; border:1px solid rgba(255,255,255,0.15);">
+            <h3 style="font-size:18px;">🏅 Peringkat Damage ke Monster</h3>
+            <table style="width:100%; margin-top:14px;">
+              <thead><tr><th style="color:#93c5fd;">Peringkat</th><th style="color:#93c5fd;">Regu</th><th style="color:#93c5fd;">Benar</th><th style="color:#93c5fd;">Damage</th></tr></thead>
+              <tbody id="gameRankingBody"></tbody>
+            </table>
+          </div>
+          <button class="cta-btn" style="margin-top:24px;" onclick="resetChallengeGame()">🔄 Main Lagi</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PROGRESS DASHBOARD ==================== -->
+    <section class="page" id="page-progress">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">📊 Progress Pembelajaran ThermoLab</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 24px;">Pantau statistik penyelesaian modul materi, eksperimen laboratorium, quiz, dan laporan praktikum.</p>
+
+      <div class="progress-card">
+        <div class="progress-ring-container">
+          <div style="text-align:center;">
+            <div style="font-size:42px; font-weight:900; color:var(--primary); font-family:'Poppins';" id="totalProgressPercent">0%</div>
+            <span style="font-size:12px; color:var(--muted); font-weight:800; text-transform:uppercase;">TOTAL PROGRESS</span>
+          </div>
+          <div style="flex:1;">
+            <h3 style="font-size:17px;">Kelengkapan Pembelajaran Mandiri</h3>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="totalProgressBar"></div>
+            </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:8px;">Selesaikan 6 eksperimen praktikum untuk mencapai 100% kelengkapan.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <b id="statSimCount">0/6</b>
+            <span>Simulasi Selesai</span>
+          </div>
+          <div class="stat-card">
+            <b>6 Modul</b>
+            <span>Materi Lengkap</span>
+          </div>
+          <div class="stat-card">
+            <b>Auto</b>
+            <span>Check Analisis</span>
+          </div>
+          <div class="stat-card">
+            <b>Excel</b>
+            <span>Export Data</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Checklist Kelengkapan Praktikum</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 14px;">
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>🔥 Hukum II (Carnot):</b> <span id="chk-carnot-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>🌡️ Kalorimetri:</b> <span id="chk-calo-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>🧊 Perpindahan Kalor:</b> <span id="chk-cond-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>🔨 Kalor Laten:</b> <span id="chk-furnace-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>⚛️ Energi Dalam:</b> <span id="chk-wom-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+          <div style="padding:16px; background:var(--surface-2); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <b>🎛️ Hukum I Termodinamika:</b> <span id="chk-sl-st" style="color:var(--muted);">Belum Selesai</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== LAPORAN PRAKTIKUM ==================== -->
+    <section class="page" id="page-laporan">
+      <h2 style="font-size: 24px; margin-bottom: 6px;">📄 Laporan Praktikum Otomatis</h2>
+      <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 24px;">Laporan terstruktur resmi disusun secara dinamis dari aktivitas simulasi dan data aktual pengamatan kamu.</p>
+
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <label style="font-weight:700;">Pilih Eksperimen:</label>
+            <select id="reportExperimentSelect" onchange="generateLabReport()" style="width:260px;">
+              <option value="carnot">Hukum II Termodinamika (Carnot)</option>
+              <option value="calo">Hukum Ke-0 & Asas Black (Kalorimetri)</option>
+              <option value="cond">Perpindahan Kalor (Konduksi)</option>
+              <option value="furnace">Kalor Laten & Perubahan Wujud</option>
+              <option value="wom">Energi Dalam & Teori Kinetik</option>
+              <option value="sl">Hukum I Termodinamika</option>
+            </select>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="action-btn" onclick="printLabReport()">🖨️ Cetak / Download PDF</button>
+            <button class="action-btn ghost" onclick="exportSelectedReportExcel()">📊 Export Excel (.xlsx)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORT PREVIEW SHEET -->
+      <div class="panel" id="reportPrintArea" style="background:white; color:#0f172a; padding:44px; border-radius:var(--radius-md); box-shadow:var(--shadow-md);">
+        <div style="text-align:center; border-bottom:2px solid #0f172a; padding-bottom:18px; margin-bottom:24px;">
+          <h2 style="font-size:22px; color:#0f172a; text-transform:uppercase; letter-spacing:0.04em;">LAPORAN PRAKTIKUM VIRTUAL THERMOLAB</h2>
+          <h3 id="reportTitle" style="color:#2563eb; font-size:18px; margin-top:6px;">MESIN KALOR CARNOT</h3>
+          <p style="font-size:12.5px; color:#64748b; margin-top:4px;">Laboratorium Virtual Termodinamika · PESP 25</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13.5px; margin-bottom:24px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+          <div><b>Praktikan:</b> Mahasiswa ThermoLab</div>
+          <div><b>Tanggal Praktikum:</b> <span id="reportDate">—</span></div>
+          <div><b>Mata Kuliah:</b> Fisika Termodinamika</div>
+          <div><b>Status Verifikasi:</b> <span style="color:#10b981; font-weight:700;">✓ Data Terverifikasi Simulasi</span></div>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <h4 style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">I. TUJUAN PRAKTIKUM</h4>
+          <p id="reportPurpose" style="font-size:14px; line-height:1.65;">—</p>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <h4 style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">II. HIPOTESIS AWAL</h4>
+          <p id="reportHypoText" style="font-size:14px; line-height:1.65;">—</p>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <h4 style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">III. DATA HASIL SIMULASI AKTUAL</h4>
+          <div id="reportTableContainer"></div>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <h4 style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">IV. ANALISIS DATA</h4>
+          <p id="reportAnalysisText" style="font-size:14px; line-height:1.65;">—</p>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <h4 style="color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">V. KESIMPULAN PRAKTIKUM</h4>
+          <p id="reportConclusionText" style="font-size:14px; line-height:1.65;">—</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div style="margin-bottom: 8px;">
+      <span class="fdot" style="background:var(--hot);"></span> Panas &nbsp;
+      <span class="fdot" style="background:var(--cold);"></span> Dingin &nbsp;
+      <span class="fdot" style="background:var(--green);"></span> Terverifikasi &nbsp;
+      <span class="fdot" style="background:var(--purple);"></span> Partikel
+    </div>
+    ThermoLab Simulation v2.5 — Laboratorium Virtual Termodinamika EdTech.
+  </footer>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ABOUT MODAL -->
+  <div class="modal-overlay" id="aboutModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('aboutModal')">✕</button>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+        <span style="font-size:38px;">🧪</span>
+        <div>
+          <h2 style="font-size:22px;">Tentang ThermoLab Simulation</h2>
+          <span style="font-size:12.5px; color:var(--muted); font-weight:700;">Versi 2.5 EdTech Modular Build</span>
+        </div>
+      </div>
+      <p style="font-size:14px; line-height:1.65; color:var(--muted);">
+        <b>ThermoLab Simulation</b> adalah platform laboratorium virtual termodinamika modern berstandar EdTech.
+        Aplikasi ini memadukan simulasi interaktif, kalkulasi dinamis, kurva Chart.js, quiz berkelanjutan, game tantangan, dan penyusunan laporan praktikum otomatis.
+      </p>
+
+      <h4 style="margin:18px 0 8px;">Fitur Utama:</h4>
+      <ul style="font-size:13.5px; color:var(--muted); line-height:1.65;">
+        <li>6 Modul Eksperimen: Carnot, Kalorimetri, Konduksi, Peleburan, Wujud Zat, dan Hukum I.</li>
+        <li>Grafik Dinamis Chart.js dengan Data Aktual Real-Time.</li>
+        <li>Checker Analisis Otomatis yang Mengevaluasi Kualitas Penjelasan Mahasiswa.</li>
+        <li>Game ThermoLab Challenge (Mode Solo & Team Room).</li>
+        <li>Export Spreadsheet Microsoft Excel (.xlsx) & Cetak Laporan PDF Resmi.</li>
+      </ul>
+
+      <div style="margin-top:22px; padding:14px; background:var(--surface-2); border-radius:var(--radius-sm); font-size:12.5px; color:var(--muted);">
+        <b>Pengembang:</b> Grup 3 · PESP 25 (Physics Educational Simulation Project)<br>
+        <b>Arsitektur:</b> Modular JavaScript & CSS (100% Compatible dengan GitHub Pages)
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('helpModal')">✕</button>
+      <h2>❓ Bantuan & Panduan Praktikum</h2>
+      <ol style="font-size:14px; line-height:1.75; color:var(--muted); margin-top:16px;">
+        <li><b>Pilih Eksperimen:</b> Masuk ke menu Simulasi dan pilih modul yang ingin diuji.</li>
+        <li><b>Jawab Hipotesis Awal:</b> Tentukan hipotesis prediksi sebelum menjalankan alat.</li>
+        <li><b>Jalankan & Catat Data:</b> Gunakan slider parameter dan tekan <b>Catat Data</b> untuk memasukkan nilai ke dataset.</li>
+        <li><b>Amati Grafik:</b> Grafik Chart.js akan memplot titik data aktual kamu.</li>
+        <li><b>Tulis Analisis:</b> Masukkan penjelasan hasil dan klik <b>Periksa Analisis</b> untuk mendapatkan masukan.</li>
+        <li><b>Cetak Laporan:</b> Buka menu Laporan untuk mengunduh laporan PDF atau file Excel.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- MORE MENU MODAL -->
+  <div class="modal-overlay" id="moreMenuModal">
+    <div class="modal-card" style="max-width:380px;">
+      <button class="modal-close" onclick="closeModal('moreMenuModal')">✕</button>
+      <h3 style="margin-bottom:16px;">⚙️ Menu & Pengaturan</h3>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="action-btn ghost" style="text-align:left; justify-content:flex-start;" onclick="closeModal('moreMenuModal'); openModal('aboutModal');">ℹ️ Tentang Aplikasi (About)</button>
+        <button class="action-btn ghost" style="text-align:left; justify-content:flex-start;" onclick="closeModal('moreMenuModal'); openModal('helpModal');">❓ Bantuan & Panduan</button>
+        <button class="action-btn ghost" style="text-align:left; justify-content:flex-start;" onclick="closeModal('moreMenuModal'); toggleTheme();">🌓 Ganti Mode Tema (Pink/Biru)</button>
+        <button class="action-btn ghost" style="text-align:left; justify-content:flex-start;" onclick="closeModal('moreMenuModal'); exportAllExcel();">📊 Export Semua Data ke Excel</button>
+        <button class="action-btn" style="background:#ef4444; text-align:left; justify-content:flex-start;" onclick="closeModal('moreMenuModal'); resetAllProgressWithConfirm();">↺ Reset Semua Progress Pembelajaran</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- MODULAR JAVASCRIPT IMPORTS -->
+  <script src="js/sfx.js?v=2.6"></script>
+  <script src="js/state.js?v=2.6"></script>
+  <script src="js/navigation.js?v=2.6"></script>
+  <script src="js/charts.js?v=2.6"></script>
+  <script src="js/simulations/carnot.js?v=2.6"></script>
+  <script src="js/simulations/kalorimetri.js?v=2.6"></script>
+  <script src="js/simulations/konduksi.js?v=2.6"></script>
+  <script src="js/simulations/peleburan.js?v=2.6"></script>
+  <script src="js/simulations/wujudzat.js?v=2.6"></script>
+  <script src="js/simulations/sislink.js?v=2.6"></script>
+  <script src="js/quiz.js?v=2.6"></script>
+  <script src="js/kahoot-fx.js?v=2.6"></script>
+  <script src="js/challenge.js?v=2.6"></script>
+  <script src="js/reports.js?v=2.6"></script>
+  <script src="js/app.js?v=2.6"></script>
+
+</body>
+</html>
