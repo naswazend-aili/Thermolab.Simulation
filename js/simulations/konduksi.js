@@ -66,6 +66,7 @@ function drawCondCanvas(){
   condCtx.fillStyle = '#f97316'; condCtx.font = '28px sans-serif';
   condCtx.fillText('🔥', x0 - 35, y0 + 32);
 
+  if(typeof isPageActive === 'function' && !isPageActive('konduksi')) return;
   requestAnimationFrame(drawCondCanvas);
 }
 

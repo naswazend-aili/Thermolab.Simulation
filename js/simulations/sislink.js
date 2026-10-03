@@ -103,6 +103,7 @@ function drawSlCanvas(){
     slCtx.beginPath(); slCtx.arc(px, py, 6, 0, Math.PI * 2); slCtx.fill();
   }
 
+  if(typeof isPageActive === 'function' && !isPageActive('sislink')) return;
   requestAnimationFrame(drawSlCanvas);
 }
 

@@ -71,6 +71,7 @@ function drawWomCanvas(){
     womCtx.stroke();
   });
 
+  if(typeof isPageActive === 'function' && !isPageActive('wujudzat')) return;
   requestAnimationFrame(drawWomCanvas);
 }
 
