@@ -4,32 +4,32 @@
 
 const experimentInfo = {
   carnot: {
-    title: 'MESIN KALOR CARNOT',
+    title: 'HUKUM II TERMODINAMIKA — SIKLUS CARNOT',
     purpose: 'Mempelajari prinsip kerja mesin kalor ideal Carnot, menghitung efisiensi termal berdasarkan perbedaan suhu reservoir (T_H dan T_C), serta menganalisis hubungan usaha mekanik dengan kalor yang diserap/dibuang.',
     theory: 'Efisiensi mesin Carnot dirumuskan dengan η = 1 - (T_C / T_H), di mana suhu harus dalam skala Kelvin mutlak. Kalor yang diserap Q_H diubah sebagian menjadi kerja W = η · Q_H dan sisanya dilepas sebagai Q_C = Q_H - W.'
   },
   calo: {
-    title: 'KALORIMETRI & ASAS BLACK',
+    title: 'HUKUM KE-0 & ASAS BLACK — KALORIMETRI',
     purpose: 'Menerapkan Asas Black untuk menentukan kalor jenis logam misterius dan mengukur suhu kesetimbangan termal campuran.',
     theory: 'Asas Black: Q_lepas = Q_terima. Logam panas melepaskan kalor m_m · c_m · (T_m - T_f) yang seluruhnya diserap oleh air dingin m_a · c_a · (T_f - T_a) hingga mencapai suhu kesetimbangan T_f.'
   },
   cond: {
-    title: 'KONDUKSI KALOR',
+    title: 'PERPINDAHAN KALOR — KONDUKSI',
     purpose: 'Membandingkan laju konduksi kalor pada berbagai jenis material batang padat (Tembaga, Besi, Kayu).',
     theory: 'Laju perpindahan kalor konduksi memenuhi persamaan P = (k · A · ΔT) / L. Semakin tinggi nilai konduktivitas termal k, semakin cepat kalor merambat ke ujung batang.'
   },
   furnace: {
-    title: 'TUNGKU PELEBURAN & KALOR LATEN',
+    title: 'KALOR LATEN & PERUBAHAN WUJUD',
     purpose: 'Menganalisis kurva pemanasan benda dan mengamati kondisi suhu konstan (plateau) pada saat terjadi perubahan wujud zat.',
     theory: 'Kalor yang masuk selama perubahan wujud tidak menaikkan suhu (Q = m · L) melainkan digunakan untuk mengubah fase zat (kalor laten peleburan dan penguapan).'
   },
   wom: {
-    title: 'SIMULASI WUJUD ZAT & TEORI KINETIK',
+    title: 'ENERGI DALAM & TEORI KINETIK',
     purpose: 'Mengamati hubungan antara suhu zat dengan energi kinetik rata-rata dan susunan partikel pada fase padat, cair, dan gas.',
     theory: 'Berdasarkan teori kinetik, energi kinetik partikel berbanding lurus dengan suhu mutlak (<Ek> = 3/2 k_B T). Kenaikan suhu meningkatkan kebebasan dan kecepatan partikel.'
   },
   sl: {
-    title: 'SISTEM & HUKUM I TERMODINAMIKA',
+    title: 'HUKUM I TERMODINAMIKA',
     purpose: 'Membuktikan hukum kekekalan energi pada gas ideal dengan membandingkan perubahan energi dalam ΔU dengan Q - W.',
     theory: 'Hukum I Termodinamika: ΔU = Q - W. Kalor yang diserap sistem digunakan untuk menambah energi dalam dan/atau melakukan usaha mekanik ke lingkungan.'
   }
@@ -118,67 +118,97 @@ function generateLabReport(){
   }
 }
 
+/* ---- Deteksi: dibuka di dalam frame/pratinjau? (unduhan & cetak sering diblokir di sana) ---- */
+function isEmbeddedFrame(){
+  try { return window.self !== window.top; } catch(e){ return true; }
+}
+const EMBED_HINT = 'Kamu membuka ThermoLab di dalam frame/pratinjau, jadi unduhan & cetak bisa diblokir browser. Buka situsnya langsung di tab baru (alamat github.io) lalu coba lagi.';
+
 function printLabReport(){
-  window.print();
+  generateLabReport();
+  if(isEmbeddedFrame()) showToast(EMBED_HINT, 'error');
+  else showToast('Di jendela cetak, pilih tujuan "Simpan sebagai PDF".', 'info');
+  setTimeout(() => {
+    try { window.print(); }
+    catch(e){ showToast('Cetak diblokir browser. ' + EMBED_HINT, 'error'); }
+  }, 150);
+}
+
+/* Simpan workbook: coba XLSX.writeFile, kalau gagal pakai Blob + link unduh manual */
+function saveWorkbook(wb, filename){
+  try {
+    XLSX.writeFile(wb, filename);
+  } catch(e){
+    try {
+      const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([out], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch(e2){
+      showToast('Gagal membuat file Excel. ' + (isEmbeddedFrame() ? EMBED_HINT : 'Coba muat ulang halaman.'), 'error');
+      return false;
+    }
+  }
+  if(isEmbeddedFrame()) showToast('Kalau file tidak terunduh: ' + EMBED_HINT, 'info');
+  return true;
 }
 
 /* EXCEL EXPORTER (SheetJS) */
 function exportExperimentExcel(expId){
   if(typeof XLSX === 'undefined'){
-    showToast('Library XLSX belum termuat.', 'error');
+    showToast('Library Excel (XLSX) belum termuat. Cek koneksi internet lalu muat ulang halaman.', 'error');
     return;
   }
-
   const data = appState.experimentsData[expId];
   if(!data || (Array.isArray(data) && !data.length)){
     showToast('Belum ada data untuk di-export pada eksperimen ini.', 'error');
     return;
   }
+  const info = experimentInfo[expId] || { title: expId };
+  const val = id => (document.getElementById(id)?.value || '').trim() || '-';
 
   const wb = XLSX.utils.book_new();
-  const wsData = XLSX.utils.json_to_sheet(Array.isArray(data) ? data : [data]);
-  XLSX.utils.book_append_sheet(wb, wsData, "Data Simulasi");
-
-  // Summary sheet
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Array.isArray(data) ? data : [data]), 'Data Simulasi');
   const summary = [
-    { Key: "Eksperimen", Value: experimentInfo[expId]?.title || expId },
-    { Key: "Hipotesis", Value: appState.hypotheses[expId] || "-" },
-    { Key: "Tanggal", Value: new Date().toISOString() }
+    { Bagian: 'Eksperimen', Isi: info.title },
+    { Bagian: 'Tanggal', Isi: new Date().toLocaleDateString('id-ID') },
+    { Bagian: 'Hipotesis awal', Isi: appState.hypotheses[expId] ? 'Opsi ' + appState.hypotheses[expId] : '-' },
+    { Bagian: 'Analisis', Isi: val(expId + 'AnalysisText') },
+    { Bagian: 'Kesimpulan', Isi: val(expId + 'ConclusionText') }
   ];
-  const wsSummary = XLSX.utils.json_to_sheet(summary);
-  XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan Laporan");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'Ringkasan Laporan');
 
-  XLSX.writeFile(wb, `ThermoLab_${expId.toUpperCase()}_Report.xlsx`);
-  showToast('File Excel berhasil di-unduh!', 'success');
-  if(typeof SFX !== 'undefined') SFX.success();
+  if(saveWorkbook(wb, `ThermoLab_${expId.toUpperCase()}_Report.xlsx`)){
+    showToast('File Excel dibuat!', 'success');
+    if(typeof SFX !== 'undefined') SFX.success();
+  }
 }
 
 function exportSelectedReportExcel(){
   const expSelect = document.getElementById('reportExperimentSelect');
-  const expId = expSelect ? expSelect.value : 'carnot';
-  exportExperimentExcel(expId);
+  exportExperimentExcel(expSelect ? expSelect.value : 'carnot');
 }
 
 function exportAllExcel(){
-  if(typeof XLSX === 'undefined') return;
+  if(typeof XLSX === 'undefined'){
+    showToast('Library Excel (XLSX) belum termuat. Cek koneksi internet lalu muat ulang halaman.', 'error');
+    return;
+  }
   const wb = XLSX.utils.book_new();
   let hasData = false;
-
   Object.keys(appState.experimentsData).forEach(exp => {
     const d = appState.experimentsData[exp];
     if(d && (Array.isArray(d) ? d.length : true)){
       hasData = true;
-      const ws = XLSX.utils.json_to_sheet(Array.isArray(d) ? d : [d]);
-      XLSX.utils.book_append_sheet(wb, ws, exp.toUpperCase());
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Array.isArray(d) ? d : [d]), exp.toUpperCase());
     }
   });
-
-  if(!hasData){
-    showToast('Belum ada data eksperimen untuk di-export.', 'error');
-    return;
+  if(!hasData){ showToast('Belum ada data eksperimen untuk di-export.', 'error'); return; }
+  if(saveWorkbook(wb, 'ThermoLab_Full_Experiment_Data.xlsx')){
+    showToast('Semua data berhasil di-export ke Excel!', 'success');
+    if(typeof SFX !== 'undefined') SFX.success();
   }
-
-  XLSX.writeFile(wb, `ThermoLab_Full_Experiment_Data.xlsx`);
-  showToast('Semua data berhasil di-export ke Excel!', 'success');
-  if(typeof SFX !== 'undefined') SFX.success();
 }

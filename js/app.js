@@ -3,6 +3,17 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  /* AKSESIBILITAS: setiap elemen non-interaktif yang punya onclick (mis. .exp-card)
+     dibuat bisa difokus & dioperasikan lewat keyboard (Tab lalu Enter/Spasi). */
+  document.querySelectorAll('[onclick]').forEach(el => {
+    const tag = el.tagName.toLowerCase();
+    if(tag === 'button' || tag === 'a' || tag === 'input' || tag === 'select' || tag === 'textarea' || tag === 'label') return;
+    if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    if(!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    el.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+    });
+  });
   initApp();
 });
 
@@ -93,7 +104,7 @@ function saveHypothesis(expId){
     return;
   }
   showToast('Hipotesis awal disimpan! Silakan mulai menjalankan simulasi.', 'success');
-  if(typeof SFX !== 'undefined') SFX.success();
+  if(typeof SFX !== 'undefined'){ SFX.success(); SFX.voice('Hipotesis disimpan. Sekarang jalankan simulasinya sesuai langkah yang ditunjukkan.'); }
   scrollToElement('page-' + expId);
 }
 
@@ -111,6 +122,11 @@ function restoreHypothesesUI(){
 }
 
 /* SIMULATION COMPLETED RESULT TRIGGER */
+const expFriendlyNames = {
+  carnot: 'Hukum Dua Termodinamika', calo: 'Hukum Ke Nol dan Kalorimetri', cond: 'Perpindahan Kalor',
+  furnace: 'Kalor Laten', wom: 'Energi Dalam', sl: 'Hukum Satu Termodinamika'
+};
+
 function triggerSimFinished(expId){
   const card = document.getElementById(expId + 'ResultCard');
   if(card){
@@ -122,63 +138,74 @@ function triggerSimFinished(expId){
     const actualEl = document.getElementById(expId + 'ActualSummary');
     if(actualEl) actualEl.textContent = `Data simulasi terverifikasi dan menunjukkan konsistensi dengan hukum termodinamika.`;
   }
+  if(typeof SFX !== 'undefined'){
+    const name = expFriendlyNames[expId] || 'eksperimen';
+    SFX.voice(`Kerja bagus! Percobaan ${name} selesai. Sekarang tulis analisis dan kesimpulanmu di bawah.`);
+  }
   updateProgressDashboard();
 }
 
 /* ANALYSIS CHECKER & FEEDBACK */
 function checkAnalysis(expId){
-  const text = document.getElementById(expId + 'AnalysisText')?.value.trim().toLowerCase() || '';
+  const raw = document.getElementById(expId + 'AnalysisText')?.value.trim() || '';
+  const text = raw.toLowerCase();
   const feedbackEl = document.getElementById(expId + 'AnalysisFeedback');
   if(!feedbackEl) return;
 
   feedbackEl.style.display = 'block';
-  
-  if(text.length < 20){
+
+  const words = text.split(/\s+/).filter(Boolean);
+  const uniqueWords = new Set(words);
+
+  if(words.length < 12){
     feedbackEl.className = 'analysis-checker-box incomplete';
-    feedbackEl.innerHTML = `<b>⚠️ Analisis Terlalu Singkat:</b> Silakan tulis kalimat penjelasan yang lebih lengkap berdasarkan grafik.`;
+    feedbackEl.innerHTML = `<b>⚠️ Analisis Terlalu Singkat:</b> Tulis penjelasan yang lebih lengkap (minimal 12 kata) berdasarkan grafik/data yang kamu catat.`;
+    if(typeof SFX !== 'undefined') SFX.warn();
+    return;
+  }
+
+  // Deteksi kata yang diulang-ulang (mis. "suhu naik suhu naik suhu naik...")
+  // supaya jawaban asal tidak lolos hanya karena panjang teksnya cukup.
+  if(uniqueWords.size / words.length < 0.45){
+    feedbackEl.className = 'analysis-checker-box incomplete';
+    feedbackEl.innerHTML = `<b>⚠️ Analisis Terlihat Berulang:</b> Sepertinya kata-katanya banyak diulang. Coba jelaskan dengan kalimat yang lebih bervariasi, sebutkan angka/data yang kamu amati.`;
     if(typeof SFX !== 'undefined') SFX.warn();
     return;
   }
 
   let isCorrect = false;
   let missingIdea = '';
+  const has = (...kw) => kw.some(k => text.includes(k));
 
   if(expId === 'carnot'){
-    if((text.includes('naik') || text.includes('meningkat') || text.includes('besar') || text.includes('berbanding lurus')) && 
-       (text.includes('suhu') || text.includes('selisih') || text.includes('delta'))) {
-      isCorrect = true;
-    } else {
-      missingIdea = 'Coba perhatikan grafik: apakah efisiensi (%) naik atau turun ketika selisih suhu semakin besar?';
-    }
-  } else if (expId === 'calo') {
-    if(text.includes('sama') || text.includes('kekal') || text.includes('setimbang') || text.includes('tetap') || text.includes('asas black')) {
-      isCorrect = true;
-    } else {
-      missingIdea = 'Ingat hukum Asas Black: kalor yang dilepas logam harus berbanding lurus / sama dengan yang diserap air.';
-    }
-  } else if (expId === 'cond') {
-    if((text.includes('tembaga') || text.includes('k')) && (text.includes('cepat') || text.includes('tinggi'))) {
-      isCorrect = true;
-    } else {
-      missingIdea = 'Sebutkan material mana (Tembaga, Besi, atau Kayu) yang kurva suhunya naik paling cepat dan mengapa (nilai k).';
-    }
-  } else if (expId === 'furnace') {
-    if(text.includes('mendatar') || text.includes('tetap') || text.includes('laten') || text.includes('konstan') || text.includes('wujud')) {
-      isCorrect = true;
-    } else {
-      missingIdea = 'Perhatikan garis grafik saat benda mendidih atau melebur. Apakah garisnya terus naik atau sempat mendatar? Mengapa?';
-    }
+    if(has('naik', 'meningkat', 'besar', 'berbanding lurus') && has('suhu', 'selisih', 'delta', 't_h', 'th')) isCorrect = true;
+    else missingIdea = 'Coba perhatikan grafik: apakah efisiensi (%) naik atau turun ketika selisih suhu (T_H − T_C) semakin besar?';
+  } else if(expId === 'calo'){
+    if(has('sama', 'kekal', 'setimbang', 'tetap', 'asas black', 'seimbang')) isCorrect = true;
+    else missingIdea = 'Ingat hukum Asas Black: kalor yang dilepas logam harus berbanding lurus / sama dengan yang diserap air.';
+  } else if(expId === 'cond'){
+    if(has('tembaga', 'konduktor', 'konduktivitas') && has('cepat', 'tinggi', 'terbaik')) isCorrect = true;
+    else missingIdea = 'Sebutkan material mana (Tembaga, Besi, atau Kayu) yang kurva suhunya naik paling cepat dan mengapa (nilai konduktivitas k).';
+  } else if(expId === 'furnace'){
+    if(has('mendatar', 'tetap', 'laten', 'konstan') && has('wujud', 'lebur', 'didih', 'fase')) isCorrect = true;
+    else missingIdea = 'Perhatikan garis grafik saat benda mendidih atau melebur. Apakah garisnya terus naik atau sempat mendatar? Kenapa (kalor laten)?';
+  } else if(expId === 'wom'){
+    if(has('cepat', 'kencang', 'besar') && has('partikel', 'kinetik', 'gerak') && has('suhu', 'panas')) isCorrect = true;
+    else missingIdea = 'Jelaskan hubungan suhu dengan kecepatan gerak partikel: makin panas, partikel bergerak seperti apa?';
+  } else if(expId === 'sl'){
+    if(has('kalor', 'q') && has('usaha', 'w') && has('energi dalam', 'delta u', 'δu', 'u')) isCorrect = true;
+    else missingIdea = 'Kaitkan tiga besaran dalam Hukum I: kalor (Q), usaha (W), dan perubahan energi dalam (ΔU). Bagaimana hubungan ΔU = Q − W pada percobaanmu?';
   } else {
-    isCorrect = true; // For others, just accept if length > 20
+    isCorrect = true;
   }
 
   if(!isCorrect){
     feedbackEl.className = 'analysis-checker-box incomplete';
-    feedbackEl.innerHTML = `<b>⚠️ Analisis Belum Tepat:</b> ${missingIdea} <br>Tuliskan kembali jawabanmu dengan menambahkan kata kunci yang tepat.`;
+    feedbackEl.innerHTML = `<b>⚠️ Analisis Belum Tepat:</b> ${missingIdea} <br>Tuliskan kembali jawabanmu dengan menyebutkan konsep dan data yang relevan.`;
     if(typeof SFX !== 'undefined') SFX.warn();
   } else {
     feedbackEl.className = 'analysis-checker-box complete';
-    feedbackEl.innerHTML = `<b>✅ Analisis Sesuai:</b> Hebat! Penjelasan kamu tepat dan sesuai dengan prinsip fisika termodinamika.`;
+    feedbackEl.innerHTML = `<b>✅ Analisis Sesuai:</b> Hebat! Penjelasan kamu menyinggung konsep fisika yang tepat untuk eksperimen ini.<br><span style="font-size:11.5px;opacity:.8;">Catatan: pengecekan ini berbasis kata kunci, bukan penilaian akhir gurumu.</span>`;
     if(typeof SFX !== 'undefined') SFX.success();
   }
   updateProgressDashboard();

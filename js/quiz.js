@@ -5,7 +5,7 @@
 const quizTopics = [
   {
     id: 'carnot',
-    name: 'Mesin Carnot',
+    name: 'Hukum II (Carnot)',
     icon: '🔥',
     desc: 'Efisiensi mesin kalor ideal, reservoir panas & dingin, serta hubungan suhu dengan kerja mekanik.',
     questions: [
@@ -43,7 +43,7 @@ const quizTopics = [
   },
   {
     id: 'calo',
-    name: 'Kalorimetri',
+    name: 'Hukum Ke-0 & Kalorimetri',
     icon: '🌡️',
     desc: 'Asas Black, kalor jenis bahan, pertukaran kalor, dan kesetimbangan termal.',
     questions: [
@@ -81,7 +81,7 @@ const quizTopics = [
   },
   {
     id: 'cond',
-    name: 'Konduksi Kalor',
+    name: 'Perpindahan Kalor',
     icon: '🧊',
     desc: 'Perambatan kalor tanpa perpindahan massa, konduktivitas termal bahan.',
     questions: [
@@ -119,7 +119,7 @@ const quizTopics = [
   },
   {
     id: 'furnace',
-    name: 'Tungku & Kalor Laten',
+    name: 'Kalor Laten',
     icon: '🔨',
     desc: 'Perubahan wujud zat, kurva pemanasan, dan kalor laten peleburan/penguapan.',
     questions: [
@@ -157,7 +157,7 @@ const quizTopics = [
   },
   {
     id: 'wom',
-    name: 'Wujud Zat & Kinetik',
+    name: 'Energi Dalam & Kinetik',
     icon: '⚛️',
     desc: 'Model partikel, energi kinetik rata-rata, dan kecepatan partikel terhadap suhu.',
     questions: [

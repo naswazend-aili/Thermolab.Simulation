@@ -3,6 +3,11 @@
    ========================================================================== */
 
 /* ROUTING SYSTEM */
+function isPageActive(pageId){
+  const el = document.getElementById('page-' + pageId);
+  return !!(el && el.classList.contains('active'));
+}
+
 function goTo(pageId){
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + pageId);
@@ -18,6 +23,14 @@ function goTo(pageId){
     if(pageId === 'progress' && typeof updateProgressDashboard === 'function') updateProgressDashboard();
     if(pageId === 'laporan' && typeof generateLabReport === 'function') generateLabReport();
     if(pageId === 'quiz' && typeof renderQuizTopic === 'function') renderQuizTopic(activeQuizTopic || 0);
+
+    // Restart canvas animation loop only for the page being opened
+    // (loops now stop themselves once you leave the page — see fix in each simulations/*.js)
+    if(pageId === 'carnot' && typeof drawCarnotCanvas === 'function') drawCarnotCanvas();
+    if(pageId === 'konduksi' && typeof drawCondCanvas === 'function') drawCondCanvas();
+    if(pageId === 'peleburan' && typeof drawFurnaceCanvas === 'function') drawFurnaceCanvas();
+    if(pageId === 'wujudzat' && typeof drawWomCanvas === 'function') drawWomCanvas();
+    if(pageId === 'sislink' && typeof drawSlCanvas === 'function') drawSlCanvas();
   }
 }
 
@@ -34,7 +47,7 @@ function showToast(msg, type = 'info'){
   toast.className = `toast ${type}`;
   toast.innerHTML = (type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ')) + msg;
   container.appendChild(toast);
-  setTimeout(() => { toast.remove(); }, 3200);
+  setTimeout(() => { toast.remove(); }, Math.max(3200, 1800 + msg.length * 45));
 }
 
 /* INPUT VALIDATOR HELPER */

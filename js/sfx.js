@@ -40,7 +40,19 @@ const SFX = (function(){
     warn(){ tone(280, 0.18, 'triangle', 0.07); },
     heat(){ tone(220, 0.2, 'sawtooth', 0.05); },
     cool(){ tone(880, 0.2, 'sine', 0.05); },
+    phase(){ tone(320, 0.14, 'triangle', 0.08); tone(640, 0.24, 'triangle', 0.08, 0.1); },
     setMuted(v){ muted = v; try{ localStorage.setItem('thermolabMuted', v ? '1' : '0'); }catch(e){} },
-    isMuted(){ return muted; }
+    isMuted(){ return muted; },
+    /* Spoken narration (Bahasa Indonesia) via the browser's built-in Web Speech API.
+       Used to tell the user what just happened / what to do next, out loud. */
+    voice(text){
+      if(muted || !('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'id-ID'; u.rate = 1.02; u.pitch = 1.08; u.volume = 0.72;
+        window.speechSynthesis.speak(u);
+      } catch(e){}
+    }
   };
 })();
